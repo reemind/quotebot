@@ -109,6 +109,12 @@ export type QueryTypeQoutesByUserArgs = {
 };
 
 
+export type QueryTypeStatArgs = {
+  forAdmin?: Maybe<Scalars['Boolean']>;
+  groupId?: Maybe<Scalars['Int']>;
+};
+
+
 export type QueryTypeTokenArgs = {
   groupId: Scalars['Long'];
 };
@@ -635,6 +641,7 @@ export type QuoteTypeEdge = {
 export type StatType = {
   __typename?: 'StatType';
   statFloor?: Maybe<Array<Maybe<StatFloorType>>>;
+  statQuotes?: Maybe<Array<Maybe<StatQuoteType>>>;
 };
 
 
@@ -685,6 +692,12 @@ export type StatFloorType = {
   __typename?: 'StatFloorType';
   count: Scalars['Int'];
   floor: Scalars['Int'];
+};
+
+export type StatQuoteType = {
+  __typename?: 'StatQuoteType';
+  count: Scalars['Int'];
+  date?: Maybe<Scalars['String']>;
 };
 
 export type GroupRole = {

@@ -35,7 +35,7 @@ export const Login: React.FC<LoginProps> = ({ callback, code, redirectUri }) => 
         <Result
             status="error"
             title="Authorization Error"
-            subTitle="Now you can enter to Panel"
+            subTitle="Please, try again"
             extra={
                 <Link to="/home">Back</Link>
             }

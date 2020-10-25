@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Json;
 using System.Threading.Tasks;
+using VkNet.Utils;
 
 namespace QuotePanel.QueryTypes
 {
@@ -46,15 +47,36 @@ namespace QuotePanel.QueryTypes
         }
 
         [Authorize(Policy = "GroupModer")]
-        public StatType GetStat()
+        public StatType GetStat(bool? forAdmin, int? groupId)
         {
-            var groupId = int.Parse(httpContext.HttpContext.User.Claims.First(t => t.Type == "GroupId").Value);
-            return new StatType
+            if (IsMainModer(forAdmin) && groupId.HasValue)
             {
-                StatFloor = context.GetUsers(context.Groups.Single(t => t.Id == groupId))
+                group = context.Groups.Find(groupId.Value);
+
+                if (groupId == null)
+                    return null;
+            }
+
+            var quotes = context.Quotes.Include(t => t.Post.Group)
+                                    .Where(t => t.Post.Group == group)
+                                    .GroupBy(t => t.Time.Date)
+                                    .OrderBy(t => t.Key)
+                                    .Select(t => new StatQuoteType
+                                    {
+                                        Date = t.Key.ToShortDateString(),
+                                        Count = t.Count()
+                                    }).ToList();
+
+            var floor = context.GetUsers(group)
                                     .GroupBy(t => t.Room / 100)
                                     .OrderBy(t => t.Key)
                                     .Select((t) => new StatFloorType { Floor = t.Key, Count = t.Count() })
+                                    .ToList();
+
+            return new StatType
+            {
+                StatFloor = floor,
+                StatQuotes = quotes
             };
         }
 
@@ -412,12 +434,19 @@ namespace QuotePanel.QueryTypes
 
     public class StatType
     {
-        public IQueryable<StatFloorType> StatFloor { get; set; }
+        public IEnumerable<StatFloorType> StatFloor { get; set; }
+        public IEnumerable<StatQuoteType> StatQuotes { get; set; }
     }
 
     public class StatFloorType
     {
         public int Floor { get; set; }
+        public int Count { get; set; }
+    }
+
+    public class StatQuoteType
+    {
+        public string Date { get; set; }
         public int Count { get; set; }
     }
 }

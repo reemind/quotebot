@@ -127,6 +127,8 @@ const Panel: React.FC = (props) => {
                                 <Route path="/panel/settings" component={(props) => <Settings {...props}/>} />
 
 
+                                <Route path="/panel/admin/dash" component={() => <Dash all/>} />
+
                                 <Route exact path="/panel/admin/users" component={() => <UsersTable all />} />
                                 <Route path="/panel/admin/user/:id" component={() => <User all profileRole={data?.profile?.role ?? 0} />} />
                                 <Route path="/panel/admin/users/multiple" component={() => <MultipleActionsUsers all/>} />
