@@ -1,0 +1,63 @@
+       
+.back-color
+    padding: 40px
+    box-sizing: border-box
+
+
+    .step-content
+        display: grid
+        justify-items: center
+        align-items: center
+        height: 100%
+
+
+.group-logo
+    height: 100px
+    width: 400px
+    background-color: #72849D
+    border-radius: 50px
+    justify-self: flex-end
+    display: grid
+    grid-template-columns: auto 100px
+    animation: GroupIn 1s ease 1s 1 normal forwards
+
+    @media (max-width: 720px)
+        justify-self: center
+
+    p
+        margin-left: 20px
+        margin-right: 20px
+        margin-top: auto
+        margin-bottom: auto
+        color: rgba(255, 255, 255, 0)
+        font-size: 1.4rem
+        font-weight: 900
+        text-align: center
+        animation: TextIn 1s ease 2s 1 normal forwards
+
+
+        @keyframes TextIn
+            0%
+                color: rgba(255, 255, 255, 0)
+            100%
+                color: rgba(255, 255, 255, 1)
+
+                
+
+    .group-photo
+        border-radius: 50px
+        height: 100px
+        width: 100px
+        background-image: url("/img/nejSb2C-1G4.jpg")
+        background-size: cover
+        justify-self: right
+
+    @keyframes GroupIn
+        0%
+            width: 100px
+
+            grid-template-columns: 0px 100px
+        100%
+            width: 400px 
+            grid-template-columns: auto 100px
+            

@@ -1,0 +1,9 @@
+schema: 'http://localhost:64393/api'
+documents: ./src/**/*.graphql
+extensions:
+  codegen:
+    generates:
+      ./src/types.ts:
+        plugins:
+          - typescript
+          - typescript-operations

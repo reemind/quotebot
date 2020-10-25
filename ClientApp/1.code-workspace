@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "..\\..\\..\\Maket"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Maket"
+	}
+}
