@@ -20,8 +20,12 @@ export const RoleTag: React.FC<{ role: number }> = ({ role }) => {
     }
 }
 
+export const EnabledTag: React.FC<{ enable: boolean }> = ({ enable }) => {
+    return (<Tag color={enable ? "green" : "red"}>{enable?"Enable":"Disable"}</Tag>)
+}
+
 export const OutTag: React.FC<{ isOut: boolean }> = ({ isOut }) => {
-    return (<Tag color={isOut ? "red" : "green"}>{isOut?"Out":"In"}</Tag>)
+    return (<Tag color={isOut ? "red" : "green"}>{isOut ? "Out" : "In"}</Tag>)
 }
 
 export const RepostTag: React.FC = (props) => {

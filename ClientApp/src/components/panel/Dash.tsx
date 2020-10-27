@@ -6,6 +6,7 @@ import React, { useState } from "react"
 import { Link } from "react-router-dom";
 import { QueryType, QueryTypeStatArgs } from "../../generated/graphql";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Area, AreaChart, } from 'recharts'
+import { EnabledTag } from "../comps/DataTags";
 
 
 const GET_DASHBOARD_INFO = gql`
@@ -67,7 +68,7 @@ const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
                 subTitle={
                     <Space>
                         {data?.groupInfo?.name}
-                        {data?.groupInfo?.enabled ? <Tag color="green">Enabled</Tag> : <Tag color="red">Disabled</Tag>}
+                        <EnabledTag enable={data?.groupInfo?.enabled ?? false} />
                     </Space>}
                 extra={[
                     all && <Select

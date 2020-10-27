@@ -57,11 +57,12 @@ export const UsersTable: React.FC<{ all?: boolean }> = ({ all }) => {
 
     const [state, setState] = useState<{
         search: string | undefined,
-        role?: number
+        role: number
         multipleSelect: UserType[]
     }>({
         search: "",
-        multipleSelect: []
+        multipleSelect: [],
+        role: -1
     })
     const { data, loading, error, refetch } = useQuery<QueryType, QueryTypeUsersArgs>(all ? GET_USERS_ALL : GET_USERS, {
         variables: {
@@ -83,8 +84,8 @@ export const UsersTable: React.FC<{ all?: boolean }> = ({ all }) => {
                         setState({ ...state, search: e.target.value })
                     }}
                     style={{ width: 200 }} />,
-                !all && <Radio.Group key="radioRoles" onChange={(e) => setState({ ...state, role: e.target.value })} defaultValue={undefined} buttonStyle="solid">
-                    <Radio.Button value={undefined}>All</Radio.Button>
+                !all && <Radio.Group key="radioRoles" onChange={(e) => setState({ ...state, role: e.target.value })} defaultValue={-1} buttonStyle="solid">
+                    <Radio.Button value={-1}>All</Radio.Button>
                     <Radio.Button value={0}>User</Radio.Button>
                     <Radio.Button value={1}>GroupModer</Radio.Button>
                     <Radio.Button value={2}>GroupAdmin</Radio.Button>
@@ -106,7 +107,7 @@ export const UsersTable: React.FC<{ all?: boolean }> = ({ all }) => {
                 <Table.Column key="room" title="Room" dataIndex="room" sorter={(a: any, b: any) => a.room - b.room} />
                 {all && <Table.Column key="buildNumber" title="House" dataIndex="buildNumber" sorter={(a: any, b: any) => a.name.localeCompare(b.name)} />}
                 {all && <Table.Column key="group" title="Group" dataIndex="group" sorter={(a: any, b: any) => a.name.localeCompare(b.name)} render={(value) => <Link to={`/panel/admin/group/${value.id}`}>{value.name}</Link>} />}
-                {!all && <Table.Column key="role" title="Role" filteredValue={[state.role?.toString() ?? ""] ?? null} dataIndex="role" filterMultiple={true} render={
+                {!all && <Table.Column key="role" title="Role" filteredValue={(state.role!=-1)?[state.role?.toString()]:null} dataIndex="role" filterMultiple={true} render={
                     role => (<RoleTag role={role} />)
                 } onFilter={
                     (value, record: any) => record.role == value

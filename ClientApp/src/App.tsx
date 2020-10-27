@@ -7,9 +7,7 @@ import { Auth } from './components/Auth';
 import { Home } from './components/Home';
 import { gql, useQuery } from '@apollo/client';
 import { QueryType } from './generated/graphql';
-import { Col, message, Row } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import { onError } from '@apollo/client/link/error';
+import { message } from 'antd';
 
 const GET_PROFILE = gql`
 query GetProfile
