@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ant-design/charts": "^1.0.1",
     "@ant-design/icons": "^4.2.2",
     "@apollo/client": "^3.2.2",
     "@testing-library/jest-dom": "^4.2.4",
@@ -25,8 +24,6 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
-    "react-vk": "^5.0.2",
-    "react-vk-auth": "0.0.2",
     "react-vk-login-button": "^1.1.0",
     "recharts": "^1.8.5",
     "rimraf": "^3.0.2",

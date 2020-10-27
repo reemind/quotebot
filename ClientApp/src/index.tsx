@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.sass';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { BrowserRouter, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
