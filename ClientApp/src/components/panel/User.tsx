@@ -1,8 +1,8 @@
-import React, { ReactText, useState } from "react";
-import { Redirect, useHistory, Switch, Route, Link, RouteComponentProps, withRouter } from "react-router-dom";
-import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Input, message, PageHeader, Radio, Row, Space, Table, Tag, Modal } from "antd";
-import { useQuery, gql, useMutation, useApolloClient, InMemoryCache, useLazyQuery } from "@apollo/client";
+import React, { useState } from "react";
+import { Redirect, Link, RouteComponentProps, withRouter } from "react-router-dom";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Button, Col, Input, message, PageHeader, Radio, Row, Space, Table, Modal } from "antd";
+import { useQuery, gql, useMutation, useApolloClient, useLazyQuery } from "@apollo/client";
 import { QueryType, QueryTypeUserArgs, MutationTypeEditUserInfoArgs, MutationType, QueryTypeUserRolesArgs, QueryTypeGroupsArgs, MutationTypeRemoveRoleArgs } from '../../generated/graphql'
 import './User.sass'
 import SwitchQuote from "./Quote";
@@ -98,7 +98,7 @@ export const User: React.FC<UserProps> = ({ match, all, profileRole }) => {
     })
 
     const client = useApolloClient()
-    const { data, loading, error, refetch } = useQuery<QueryType, QueryTypeUserArgs>(GET_USER, {
+    const { data, loading, refetch } = useQuery<QueryType, QueryTypeUserArgs>(GET_USER, {
         variables: {
             id: id,
             forAdmin: all
@@ -154,7 +154,7 @@ export const User: React.FC<UserProps> = ({ match, all, profileRole }) => {
                 subTitle={`Комната: ${data.user?.room}`}
                 extra={[
                     <a key="vkLink" target="_blank" rel="noopener noreferrer" href={`https://vk.com/id${data.user?.vkId}`}>Vk Profile</a>,
-                    <Button type="primary" icon={mutData.loading && <LoadingOutlined />} key="2" disabled={(((state?.type ?? data.user?.role) === data.user?.role) && state.name == "") || mutData.loading} onClick={() => {
+                    <Button type="primary" icon={mutData.loading && <LoadingOutlined />} key="2" disabled={(((state?.type ?? data.user?.role) === data.user?.role) && state.name === "") || mutData.loading} onClick={() => {
                         editInfo({
                             variables: {
                                 id,
@@ -197,7 +197,7 @@ export const User: React.FC<UserProps> = ({ match, all, profileRole }) => {
                             key="action"
                             render={(record) => (
                                 <Space size="middle">
-                                    <Button onClick={() => SwitchQuote(client, record.id, record.isOut ? "in" : "out", () => refetch(), all)}>{record.isOut ? "MakeIn" : "MakeOut"}</Button>
+                                    <Button onClick={() => SwitchQuote(client, record.id, () => refetch(), all)}>{record.isOut ? "MakeIn" : "MakeOut"}</Button>
                                 </Space>
                             )}
                         />

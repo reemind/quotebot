@@ -1,20 +1,20 @@
-﻿import { FC } from "react"
+﻿import { CSSProperties } from "react"
 import { Tag } from "antd"
 import React from "react"
 
 
-export const RoleTag: React.FC<{ role: number }> = ({ role }) => {
+export const RoleTag: React.FC<{ role: number, style?: CSSProperties }> = ({role, style}) => {
     switch (role) {
         case 0:
-            return (<Tag color="green">User</Tag>)
+            return (<Tag style={style} color="green">User</Tag>)
         case 1:
-            return (<Tag color="blue">Moder</Tag>)
+            return (<Tag style={style} color="blue">Moder</Tag>)
         case 2:
-            return (<Tag color="red">Admin</Tag>)
+            return (<Tag style={style} color="red">Admin</Tag>)
         case 3:
-            return (<Tag color="blue">MainModer</Tag>)
+            return (<Tag style={style} color="blue">MainModer</Tag>)
         case 4:
-            return (<Tag color="red">MainAdmin</Tag>)
+            return (<Tag style={style} color="red">MainAdmin</Tag>)
         default:
             return <div></div>
     }

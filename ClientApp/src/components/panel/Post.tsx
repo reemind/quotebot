@@ -1,12 +1,10 @@
 import React, { ReactText, useState } from "react";
-import { Redirect, useHistory, Switch, Route, Link, RouteComponentProps, withRouter } from "react-router-dom";
-import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Drawer, Input, InputNumber, message, PageHeader, Radio, Row, Space, Table, Tag } from "antd";
+import { Redirect, Link, RouteComponentProps, withRouter } from "react-router-dom";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Button, Col, Drawer, Input, InputNumber, message, PageHeader, Row, Space, Table, Tag } from "antd";
 import { useQuery, gql, useMutation, useApolloClient } from "@apollo/client";
 import { MutationType, MutationTypeEditPostInfoArgs, MutationTypeNotifyUsersArgs, QueryType, QueryTypeUserArgs } from '../../generated/graphql'
 import './User.sass'
-import Avatar from "antd/lib/avatar/avatar";
-import userEvent from "@testing-library/user-event";
 import SwitchQuote from "./Quote";
 import { OutTag, RepostTag } from "../comps/DataTags";
 
@@ -73,7 +71,7 @@ export const Post: React.FC<PostProps> = ({ match }) => {
     })
 
     const client = useApolloClient()
-    const { data, loading, error, refetch } = useQuery<QueryType, QueryTypeUserArgs>(GET_POST, {
+    const { data, loading, refetch } = useQuery<QueryType, QueryTypeUserArgs>(GET_POST, {
         variables: {
             id
         }
@@ -152,7 +150,7 @@ export const Post: React.FC<PostProps> = ({ match }) => {
                     key="action"
                     render={(record) => (
                         <Space size="middle">
-                            <Button onClick={() => SwitchQuote(client, record.id, record.isOut ? "in" : "out", () => refetch())}>{record.isOut ? "MakeIn" : "MakeOut"}</Button>
+                            <Button onClick={() => SwitchQuote(client, record.id, () => refetch())}>{record.isOut ? "MakeIn" : "MakeOut"}</Button>
                         </Space>
                     )}
                 />

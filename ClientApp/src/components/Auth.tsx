@@ -1,15 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import './Auth.sass'
 import { Grouplist } from './Grouplist'
-import { gql, useQuery } from '@apollo/client'
 import { Steps } from 'antd'
 import { UnorderedListOutlined, LoginOutlined, SyncOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import '../generated/graphql'
-import { GroupResponseType, GroupType } from '../generated/graphql'
+import { GroupResponseType } from '../generated/graphql'
 import { Login } from './Login'
 import { AuthLoading } from './AuthLoading'
 import { Redirect } from 'react-router-dom'
-import App from '../App'
 
 
 

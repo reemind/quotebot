@@ -1,8 +1,7 @@
-import { GroupResponseType, QueryTypeGroupsArgs, QueryTypeTokenArgs } from '../generated/graphql'
-import VKLogin from 'react-vk-login-button'
-import React, { useState } from 'react'
+import { QueryTypeTokenArgs } from '../generated/graphql'
+import React from 'react'
 import { gql, useQuery } from '@apollo/client'
-import { LoadingOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import { LoadingOutlined } from '@ant-design/icons'
 import { Result, Button } from 'antd'
 import { Link } from 'react-router-dom'
 

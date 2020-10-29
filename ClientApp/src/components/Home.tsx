@@ -1,7 +1,7 @@
-﻿import React, { useState } from "react";
-import { Redirect, useHistory } from "react-router-dom";
+﻿import React from "react";
+import { useHistory } from "react-router-dom";
 import VKLogin from 'react-vk-login-button'
-import { Row, Col, Layout } from 'antd'
+import { Row, Col } from 'antd'
 
 
 export const Home: React.FC<{ setAuthProps: (code, redirect) => void }> = ({ setAuthProps }) => {
@@ -11,7 +11,7 @@ export const Home: React.FC<{ setAuthProps: (code, redirect) => void }> = ({ set
         <div style={{ minHeight: '100vh' }} className="du-about">
             <Row>
                 <Col span={6}>
-                    <img src="/img/logo.png"/>
+                    <div className="logo"/>
                 </Col>
             </Row>
             <Row >

@@ -1,7 +1,6 @@
-import React, { ReactText, useState } from "react";
-import { Redirect, useHistory, Switch, Route, Link } from "react-router-dom";
-import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, PageHeader, Space, Table, Tag } from "antd";
+import React from "react";
+import { Link } from "react-router-dom";
+import { PageHeader, Space, Table, Tag } from "antd";
 import { useQuery, gql } from "@apollo/client";
 import { QueryType, QueryTypeGroupsArgs } from '../../../generated/graphql'
 
@@ -19,8 +18,8 @@ query GetGroups{
 }`;
 
 
-export const GroupsTable: React.FC = (props) => {
-    const { data, loading, error } = useQuery<QueryType, QueryTypeGroupsArgs>(GET_GROUPS)
+export const GroupsTable: React.FC = () => {
+    const { data, loading } = useQuery<QueryType, QueryTypeGroupsArgs>(GET_GROUPS)
     console.log(data)
     return <React.Fragment>
     <PageHeader

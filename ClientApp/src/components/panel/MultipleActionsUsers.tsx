@@ -1,7 +1,5 @@
-import React, { ReactText, useState } from "react";
-import { Redirect, useHistory, Switch, Route, Link } from "react-router-dom";
-import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Input, message, Modal, PageHeader, Row, Space, Table, Tag, Transfer } from "antd";
+import React, { useState } from "react";
+import { Button, message, Modal, PageHeader, Table, Transfer } from "antd";
 import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 import { MutationType, MutationTypeSendUsersArgs, QueryType, QueryTypeUsersArgs, QueryTypePostsArgs, MutationTypeAddUsersToPostArgs } from '../../generated/graphql'
 import difference from 'lodash/difference';
@@ -123,7 +121,7 @@ export const MultipleActionsUsers: React.FC<{ all?: boolean }> = ({ all }) => {
         messageText: "",
         postId: 0
     })
-    const { data, loading, error } = useQuery<QueryType, QueryTypeUsersArgs>(GET_USERS, {
+    const { data, loading } = useQuery<QueryType, QueryTypeUsersArgs>(GET_USERS, {
         variables: {
             forAdmin: all
         }
@@ -155,10 +153,14 @@ export const MultipleActionsUsers: React.FC<{ all?: boolean }> = ({ all }) => {
         {
             dataIndex: 'name',
             title: 'Name',
+            responsive: undefined,
+            ellipsis: true
         },
         {
             dataIndex: 'room',
             title: 'Room',
+            responsive: ['sm'],
+            ellipsis: true
         }
     ]
 
@@ -166,6 +168,8 @@ export const MultipleActionsUsers: React.FC<{ all?: boolean }> = ({ all }) => {
         columns.push({
             dataIndex: "buildNumber",
             title: "House",
+            responsive: ['md'],
+            ellipsis: false
         })
 
     return <React.Fragment>

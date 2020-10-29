@@ -1,12 +1,8 @@
-import React, { ReactText, useState } from "react";
-import { Redirect, useHistory, Switch, Route, Link } from "react-router-dom";
-import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, PageHeader, Space, Table, Tag } from "antd";
+import React from "react";
+import { Link } from "react-router-dom";
+import { PageHeader, Space, Table } from "antd";
 import { useQuery, gql } from "@apollo/client";
-import { QueryType, QueryTypePostsArgs, QueryTypeUsersArgs, UserType } from '../../generated/graphql'
-import Search from "antd/lib/transfer/search";
-import { TablePaginationConfig } from "antd/lib/table";
-import { SorterResult } from "antd/lib/table/interface";
+import { QueryType, QueryTypePostsArgs } from '../../generated/graphql'
 import { RepostTag } from "../comps/DataTags";
 
 const GET_POSTS = gql`
@@ -24,7 +20,7 @@ query GetPosts{
 
 
 export const PostsTable: React.FC<{ all?: boolean }> = ({ all }) => {
-    const { data, loading, error } = useQuery<QueryType, QueryTypePostsArgs>(GET_POSTS)
+    const { data, loading } = useQuery<QueryType, QueryTypePostsArgs>(GET_POSTS)
 
     return <React.Fragment>
     <PageHeader

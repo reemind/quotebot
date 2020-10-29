@@ -1,10 +1,9 @@
 import { LoadingOutlined } from "@ant-design/icons";
-import { gql, MutationTuple, useMutation, useQuery, useLazyQuery } from "@apollo/client"
+import { gql, useMutation, useQuery } from "@apollo/client"
 import { Button, Col, Form, Input, message, PageHeader, Row, Switch } from "antd"
-import { valueFromAST } from "graphql";
 import React, { useState } from "react"
-import { Link, RouteComponentProps } from "react-router-dom";
-import { GroupInfoTypeInput, MutationType, MutationTypeUpdateGroupArgs, QueryType, QueryTypeGroupInfoArgs } from "../../generated/graphql";
+import { RouteComponentProps } from "react-router-dom";
+import { MutationType, MutationTypeUpdateGroupArgs, QueryType, QueryTypeGroupInfoArgs } from "../../generated/graphql";
 
 const GET_GROUP_INFO = gql`
 query GetGroupInfo($id : Int, $forAdmin: Boolean, $newGroup: Boolean) {
@@ -61,7 +60,7 @@ const Settings: React.FC<GroupProps> = ({ match, history, all, newGroup }) => {
         onCompleted: (dat) => setState({ ...state, withFilter: dat?.groupInfo?.withFilter ?? false })
     })
 
-    const [update, mutData] = useMutation<MutationType, MutationTypeUpdateGroupArgs>(UPDATE_GROUP, {
+    const [update] = useMutation<MutationType, MutationTypeUpdateGroupArgs>(UPDATE_GROUP, {
         onCompleted: (value) => {
             if (value?.updateGroup)
                 successMes()
@@ -135,7 +134,7 @@ const Settings: React.FC<GroupProps> = ({ match, history, all, newGroup }) => {
                             <Switch onChange={(val) => setState({ ...state, withFilter: val })} defaultChecked={data?.groupInfo?.withFilter ?? false} />
                         </Form.Item>
                         <Form.Item hidden={!state.withFilter} name="filterPattern" label="Filter Pattern">
-                            <Input defaultValue={data?.groupInfo?.filterPattern ?? "[Уу]частвую"} />
+                            <Input defaultValue={data?.groupInfo?.filterPattern ?? "[пїЅпїЅ]пїЅпїЅпїЅпїЅпїЅпїЅпїЅ"} />
                         </Form.Item>
                         <Form.Item>
                             <Button type="primary" htmlType="submit">Save Changes</Button>

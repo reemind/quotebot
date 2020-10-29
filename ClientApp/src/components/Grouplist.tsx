@@ -1,17 +1,9 @@
 import { Card, Space } from "antd";
-import { createPublicKey } from "crypto";
 import { Maybe } from "graphql/jsutils/Maybe";
 import React from "react";
 import { GroupType } from "../generated/graphql";
 import './Grouplist.sass'
 import { RoleTag } from "./comps/DataTags";
-
-interface Group {
-    id: number,
-    name: string,
-    img: string,
-    role: number
-}
 
 type GrouplistProps = {
     groups?: Maybe<GroupType>[]

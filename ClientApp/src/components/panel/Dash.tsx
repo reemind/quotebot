@@ -1,11 +1,9 @@
 import { LoadingOutlined, UserOutlined, CheckOutlined } from "@ant-design/icons";
-import { gql, MutationTuple, useMutation, useQuery, useLazyQuery } from "@apollo/client"
-import { Button, Col, Form, Input, message, PageHeader, Row, Space, Switch, Tag, Statistic, Select } from "antd"
-import { valueFromAST } from "graphql";
+import { gql, useQuery } from "@apollo/client"
+import { Col, PageHeader, Row, Space, Statistic, Select } from "antd"
 import React, { useState } from "react"
-import { Link } from "react-router-dom";
 import { QueryType, QueryTypeStatArgs } from "../../generated/graphql";
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, LineChart, Area, AreaChart, } from 'recharts'
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Area, AreaChart, ResponsiveContainer, } from 'recharts'
 import { EnabledTag } from "../comps/DataTags";
 
 
@@ -57,8 +55,8 @@ query GetGroupsInfo($groupId: Int) {
 
 
 const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
-    const [state, setState] = useState<{ group?: number }>()
-    const { data, loading, error, refetch } = useQuery<QueryType, QueryTypeStatArgs>(all ? GET_DASHBOARD_INFO_ALL : GET_DASHBOARD_INFO)
+    const [] = useState<{ group?: number }>()
+    const { data, loading, refetch } = useQuery<QueryType, QueryTypeStatArgs>(all ? GET_DASHBOARD_INFO_ALL : GET_DASHBOARD_INFO)
 
     if (!loading)
         return <React.Fragment>
@@ -79,27 +77,31 @@ const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
                     </Select>,
                     <a key="vkLink" target="_blank" rel="noopener noreferrer" href={"https://vk.com/public" + data?.groupInfo?.groupId}>Page</a>
                 ]} />
-            
-            <Row align="middle" justify="center">
-                <Col>
-                    <BarChart height={250} width={500} data={data?.stat?.statFloor?.map(t => t as object) ?? undefined}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="floor" />
-                        <YAxis dataKey="count" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="count" fill="#fa541c" />
-                    </BarChart>
+
+            <Row align="middle" justify="center" >
+                <Col flex="12" md={12}>
+                    <ResponsiveContainer height={250}>
+                        <BarChart data={data?.stat?.statFloor?.map(t => t as object) ?? undefined}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="floor" />
+                            <YAxis dataKey="count" />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" fill="#fa541c" />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </Col>
-                <Col>
-                    <AreaChart height={250} width={500} data={data?.stat?.statQuotes?.map(t => t as object) ?? undefined}>
-                        <XAxis dataKey="date" />
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <YAxis dataKey="count" />
-                        <Tooltip />
-                        <Legend />
-                        <Area type="monotone" dataKey="count" fill="#722ed1" />
-                    </AreaChart>
+                <Col flex="12" md={12}>
+                    <ResponsiveContainer height={250}>
+                        <AreaChart height={250} width={500} data={data?.stat?.statQuotes?.map(t => t as object) ?? undefined}>
+                            <XAxis dataKey="date" />
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <YAxis dataKey="count" />
+                            <Tooltip />
+                            <Legend />
+                            <Area type="monotone" dataKey="count" fill="#722ed1" />
+                        </AreaChart>
+                    </ResponsiveContainer>
                 </Col>
             </Row>
             <Row style={{ height: 200 }} gutter={60} align="stretch" justify="center">
