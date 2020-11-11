@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "QuoteBot", "QuoteBot\QuoteBot.pyproj", "{370D8DC2-1F99-4B90-BD7F-6ED47DC2AEC0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuoteSharp", "QuoteSharp\QuoteSharp.csproj", "{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuoteSharp.Tests", "QuoteSharp.Tests\QuoteSharp.Tests.csproj", "{DC491F49-9B13-4BF5-B039-817F8ACFAA77}"
+	ProjectSection(ProjectDependencies) = postProject
+		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F} = {69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VkCallback-Handler", "..\VkCallback-Handler\VkCallback-Handler\VkCallback-Handler.csproj", "{5B05A256-1991-4464-A095-C38B515F03BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuotePanel", "QuotePanel\QuotePanel.csproj", "{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{370D8DC2-1F99-4B90-BD7F-6ED47DC2AEC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{370D8DC2-1F99-4B90-BD7F-6ED47DC2AEC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{370D8DC2-1F99-4B90-BD7F-6ED47DC2AEC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{370D8DC2-1F99-4B90-BD7F-6ED47DC2AEC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC491F49-9B13-4BF5-B039-817F8ACFAA77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC491F49-9B13-4BF5-B039-817F8ACFAA77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC491F49-9B13-4BF5-B039-817F8ACFAA77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC491F49-9B13-4BF5-B039-817F8ACFAA77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B05A256-1991-4464-A095-C38B515F03BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B05A256-1991-4464-A095-C38B515F03BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B05A256-1991-4464-A095-C38B515F03BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B05A256-1991-4464-A095-C38B515F03BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9D6ADFAB-988D-4109-964E-9807815426F6}
+	EndGlobalSection
+EndGlobal
