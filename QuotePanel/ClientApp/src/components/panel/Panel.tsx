@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import './Panel.sass'
-import { Layout, Menu, Space, Col, Row, Button } from 'antd'
+import { Layout, Menu, Space, Col, Row, Button, Switch as CheckSwitch } from 'antd'
 import { SettingOutlined, LogoutOutlined, DashboardOutlined, BorderlessTableOutlined, LoadingOutlined, SnippetsOutlined, MenuOutlined } from "@ant-design/icons";
 import { Redirect, useHistory, Switch, Route } from "react-router-dom";
 import Users from "./Users";
@@ -59,7 +59,7 @@ const ContentItems: ItemType[] = [
 ]
 
 
-const Panel: React.FC = () => {
+const Panel: React.FC<{ onToggleTheme: () => string, theme: string }> = ({ onToggleTheme, theme }) => {
     const [state, setState] = useState<{ collapsed: boolean }>({
         collapsed: false
     })
@@ -72,9 +72,9 @@ const Panel: React.FC = () => {
 
     if (!loading && data)
         return (
-            <Layout style={{ minHeight: '100vh'}}>
+            <Layout style={{ minHeight: '100vh' }}>
                 <Sider collapsible breakpoint="lg" collapsed={state.collapsed} onCollapse={(collapsed) => setState({ collapsed })} collapsedWidth="0" trigger={null}>
-                            <div className="logo"/>
+                    <div className="logo" />
                     <Menu theme="dark" defaultSelectedKeys={ContentItems.filter(t => history.location.pathname.startsWith(t.path)).map(t => t.key)} mode="vertical" onClick={({ key }) => {
                         history.push(ContentItems.find(t => t.key === key)?.path ?? "")
                     }}>
@@ -92,16 +92,24 @@ const Panel: React.FC = () => {
                     </Menu>
                 </Sider>
                 <Layout className="site-layout">
-                    <Header className="site-layout-sub-header-background" style={{ padding: 0, alignItems: "end", backgroundColor: "white"}}>
+                    <Header className="site-layout-sub-header-background" style={{ padding: 0, alignItems: "end", backgroundColor: "white" }}>
                         <Row justify="center" gutter={[20, 24]} style={{ marginLeft: 20, marginRight: 20 }}>
-                        <Col flex="60px" className="row-gutter">
-                        <MenuOutlined onClick={() => setState({ collapsed: !state.collapsed })}/>
-                        </Col>
+                            <Col flex="60px" className="row-gutter">
+                                <MenuOutlined onClick={() => setState({ collapsed: !state.collapsed })} />
+                            </Col>
                             <Col flex="auto" className="row-gutter">
                                 <Space align="baseline" direction="horizontal">
-                                    
+
                                     <h3>QuoteBot Panel</h3>
                                 </Space>
+                            </Col>
+                            <Col flex="60px" className="row-gutter">
+                                <CheckSwitch
+                                    checkedChildren="Day"
+                                    unCheckedChildren="Night"
+                                    defaultChecked={theme=="light"}
+                                    onChange={() => onToggleTheme()}                                    
+                                />
                             </Col>
                             <Col flex="60px" className="row-gutter">
                                 <Button shape="circle" onClick={() => history.push("/panel/settings")}><SettingOutlined /></Button>
@@ -123,7 +131,7 @@ const Panel: React.FC = () => {
                                 <Redirect exact from="/panel/" to="/panel/dash" />
                                 <Route path="/panel/dash" component={() => <Dash />} />
 
-                                <Route exact path="/panel/users" component={() => <Users isMobile={isMobile}/>} />
+                                <Route exact path="/panel/users" component={() => <Users isMobile={isMobile} />} />
                                 <Route path="/panel/user/:id" component={() => <User profileRole={data?.profile?.role ?? 0} />} />
                                 <Route path="/panel/users/multiple" component={() => <MultipleActionsUsers />} />
 

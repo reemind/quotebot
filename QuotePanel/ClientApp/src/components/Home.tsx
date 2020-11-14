@@ -4,11 +4,11 @@ import VKLogin from 'react-vk-login-button'
 import { Row, Col } from 'antd'
 
 
-export const Home: React.FC<{ setAuthProps: (code, redirect) => void }> = ({ setAuthProps }) => {
+export const Home: React.FC<{ setAuthProps: (code, redirect) => void, className?: string }> = ({ setAuthProps, className }) => {
     const history = useHistory()
 
     return (
-        <div style={{ minHeight: '100vh' }} className="du-about">
+        <div style={{ minHeight: '100vh' }} className={"du-about " + className ?? ""}>
             <Row>
                 <Col span={6}>
                     <div className="logo"/>
