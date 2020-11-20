@@ -36,7 +36,7 @@ namespace QuotePanel
             services.AddLogging(loggingBuilder =>
                 loggingBuilder.AddSerilog(dispose: true));
 
-            services.AddDbContext<Data.DataContext>((builder) =>
+            services.AddDbContext<DatabaseContext.DataContext>((builder) =>
                 builder.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

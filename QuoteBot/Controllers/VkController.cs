@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using QuotePanel.Data;
 using System.Net;
 using VkCallbackApi;
 using System.Resources;
+using DatabaseContext;
 
 namespace QuotePanel.Controllers
 {

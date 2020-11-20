@@ -4,7 +4,8 @@ using HotChocolate.Types;
 using HotChocolate.Types.Relay;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using QuotePanel.Data;
+using DatabaseContext;
+using Data = DatabaseContext;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -308,11 +309,13 @@ namespace QuotePanel.QueryTypes
 
             var report = context.CreateReport(group, post);
             var reportQuotes = context.GetReportItems(report).Include(t => t.FromQuote.User);
-            var quotes = context.GetQuotes(post)
+            var quotes = context
+                .GetQuotes(post)
                 .Include(t => t.User)
                 .Where(t => quotesId.Contains(t.Id))
                 .Except(reportQuotes.Select(t => t.FromQuote));
-            var groups = quotes.Include(t => t.User.House)
+            var groups = quotes
+                .Include(t => t.User.House)
                 .Select(t => t.User)
                 .AsEnumerable()
                 .GroupBy(t => t.House);
@@ -339,7 +342,8 @@ namespace QuotePanel.QueryTypes
                     var sendResults = api.Messages.SendToUserIds(prms);
 
                     foreach (var res in sendResults)
-                        quotesForReports.RemoveAll(t => res.PeerId == t.User.Id);
+                        if(!res.MessageId.HasValue)
+                            quotesForReports.RemoveAll(t => res.PeerId == t.User.Id);
                 }
                 catch
                 {
@@ -459,6 +463,23 @@ namespace QuotePanel.QueryTypes
             context.SaveChanges();
 
             return true;
+        }
+    }
+
+    public class MessagePost : VkNet.Model.Attachments.MediaAttachment
+    {
+        protected override string Alias => "wall";
+
+        public MessagePost(long owner_id, long id)
+        {
+            Id = id;
+            OwnerId = -owner_id;
+        }
+
+        public MessagePost(Data.Post post)
+        {
+            Id = post.PostId;
+            OwnerId = -post.Group.GroupId;
         }
     }
 }

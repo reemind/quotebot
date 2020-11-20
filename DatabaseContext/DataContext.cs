@@ -9,7 +9,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
-namespace QuotePanel.Data
+namespace DatabaseContext
 {
     public class DataContext : DbContext
     {
@@ -26,7 +26,7 @@ namespace QuotePanel.Data
         public DataContext(DbContextOptions options) : base(options)
         {
             Database.EnsureCreated();
-            var str = Database.GenerateCreateScript();
+            //var str = Database.GenerateCreateScript();
         }
 
         public IQueryable<Post> GetPosts(Group group)

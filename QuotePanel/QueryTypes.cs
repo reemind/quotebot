@@ -4,7 +4,7 @@ using HotChocolate.Types;
 using HotChocolate.Types.Relay;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using QuotePanel.Data;
+using DatabaseContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;

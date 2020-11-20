@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using QuotePanel.Data;
+using Data = DatabaseContext;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,6 +16,8 @@ using VkNet.Enums;
 using VkNet.Model;
 using VkNet.Model.Attachments;
 using VkNet.Model.Keyboard;
+using DatabaseContext;
+using QuoteBot.Resources;
 
 namespace QuotePanel
 {
@@ -167,8 +169,8 @@ namespace QuotePanel
                     Response("Уведомления для репостов недоступны");
                 else
                 {
-                    bool res = MultipleResponse(post);
-                    Response("Сообщения отправлены " + (res ? "" : "не всем"));
+                    int res = MultipleResponse(post);
+                    Response($"Сообщения отправлены {res} людям");
                 }
             }
             else if (Check(@"\A[Уу]ведомить"))
@@ -179,8 +181,8 @@ namespace QuotePanel
                     Response("Уведомления для репостов недоступны");
                 else
                 {
-                    bool res = MultipleResponse(post);
-                    Response("Сообщения отправлены " + (res ? "" : "не всем"));
+                    int res = MultipleResponse(post);
+                    Response($"Сообщения отправлены {res} людям");
                 }
             }
             else if (Check(@"\A[Уу]далить ([\d]+)"))
@@ -251,7 +253,7 @@ namespace QuotePanel
             }
             else if (Check(@"\A[Пп]омощь"))
             {
-                Response(Resources.Resource.Help + (context.InRole(userRole.User, group, UserRole.Admin) ? Resources.Resource.HelpAdmin : ""));
+                Response(Resource.Help + (context.InRole(userRole.User, group, UserRole.Admin) ? Resource.HelpAdmin : ""));
             }
             else if (context.InRole(userRole.User, group, UserRole.Admin))
             {
@@ -321,10 +323,8 @@ namespace QuotePanel
                     }
             };
 
-        private bool MultipleResponse(Data.Post post)
+        private int MultipleResponse(Data.Post post)
         {
-            bool result = true;
-
             var report = context.CreateReport(group, post);
             var reportQuotes = context.GetReportItems(report).Include(t => t.FromQuote.User);
             var quotes = context.GetQuotes(post)
@@ -335,8 +335,10 @@ namespace QuotePanel
             var groups = quotes
                 .Include(t => t.User.House)
                 .Select(t => t.User)
-                .AsEnumerable().GroupBy(t => t.House);
-            context.AddReportItems(report, quotes.AsEnumerable());
+                .AsEnumerable()
+                .GroupBy(t => t.House);
+
+            var quotesForReports = quotes.ToList();
 
             foreach (var gr in groups)
                 try
@@ -351,15 +353,20 @@ namespace QuotePanel
                         Attachments = new List<MessagePost> { new MessagePost(post) }
                     };
 
-                    api.Messages.SendToUserIds(prms);
+                    var sendResults = api.Messages.SendToUserIds(prms);
+
+                    foreach (var res in sendResults)
+                        if (!res.MessageId.HasValue)
+                            quotesForReports.RemoveAll(t => res.PeerId == t.User.Id);
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex.Message);
-                    result = false;
                 }
 
-            return result;
+            context.AddReportItems(report, quotesForReports);
+
+            return quotesForReports.Count;
         }
 
         [VkMethod("wall_reply_new")]
