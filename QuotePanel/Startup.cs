@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using HotChocolate.Types;
 using Serilog;
 using Microsoft.AspNetCore.HttpOverrides;
+using OfficeOpenXml;
 
 namespace QuotePanel
 {
@@ -100,11 +101,15 @@ namespace QuotePanel
                     .AddType<GroupType>()
                     .AddType<PostType>()
                     .AddType<QuoteType>()
+                    .AddType<ReportType>()
+                    .AddType<ReportItemType>()
                     .AddServices(sp)
                     .AddAuthorizeDirectiveType().Create());
 
             services.AddControllersWithViews();
             services.AddCors();
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

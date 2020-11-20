@@ -30,6 +30,9 @@ export type QueryType = {
   qoutes?: Maybe<QuoteTypeConnection>;
   qoutesByPost?: Maybe<QuoteTypeConnection>;
   qoutesByUser?: Maybe<QuoteTypeConnection>;
+  report?: Maybe<ReportType>;
+  reportItems?: Maybe<ReportItemTypeConnection>;
+  reports?: Maybe<ReportTypeConnection>;
   stat?: Maybe<StatType>;
   token?: Maybe<Scalars['String']>;
   user?: Maybe<UserType>;
@@ -109,6 +112,32 @@ export type QueryTypeQoutesByUserArgs = {
 };
 
 
+export type QueryTypeReportArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryTypeReportItemsArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  id: Scalars['Int'];
+  last?: Maybe<Scalars['PaginationAmount']>;
+  order_by?: Maybe<ReportItemTypeSort>;
+  where?: Maybe<ReportItemTypeFilter>;
+};
+
+
+export type QueryTypeReportsArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  last?: Maybe<Scalars['PaginationAmount']>;
+  order_by?: Maybe<ReportTypeSort>;
+  where?: Maybe<ReportTypeFilter>;
+};
+
+
 export type QueryTypeStatArgs = {
   forAdmin?: Maybe<Scalars['Boolean']>;
   groupId?: Maybe<Scalars['Int']>;
@@ -144,12 +173,17 @@ export type QueryTypeUsersArgs = {
 export type MutationType = {
   __typename?: 'MutationType';
   addUsersToPost: Scalars['Int'];
+  closeReport: Scalars['Boolean'];
+  createFromToken: Scalars['Int'];
+  createReport: Scalars['Int'];
+  deletePost: Scalars['Boolean'];
   editPostInfo: Scalars['Boolean'];
   editUserInfo: Scalars['Boolean'];
-  notifyUsers: Scalars['Boolean'];
+  notifyUsers: Scalars['Int'];
   removeRole: Scalars['Boolean'];
   sendUsers: Scalars['Boolean'];
   switchQuoteVal: Scalars['Boolean'];
+  switchVerificationVal: Scalars['Boolean'];
   updateGroup: Scalars['Boolean'];
 };
 
@@ -157,6 +191,30 @@ export type MutationType = {
 export type MutationTypeAddUsersToPostArgs = {
   postId: Scalars['Int'];
   usersIds?: Maybe<Array<Scalars['Int']>>;
+};
+
+
+export type MutationTypeCloseReportArgs = {
+  forAdmin?: Maybe<Scalars['Boolean']>;
+  id: Scalars['Int'];
+};
+
+
+export type MutationTypeCreateFromTokenArgs = {
+  groupName?: Maybe<Scalars['String']>;
+  token?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationTypeCreateReportArgs = {
+  postId: Scalars['Int'];
+  quoteIds?: Maybe<Array<Scalars['Int']>>;
+};
+
+
+export type MutationTypeDeletePostArgs = {
+  forAdmin?: Maybe<Scalars['Boolean']>;
+  id: Scalars['Int'];
 };
 
 
@@ -195,6 +253,12 @@ export type MutationTypeSendUsersArgs = {
 
 
 export type MutationTypeSwitchQuoteValArgs = {
+  forAdmin?: Maybe<Scalars['Boolean']>;
+  id: Scalars['Int'];
+};
+
+
+export type MutationTypeSwitchVerificationValArgs = {
   forAdmin?: Maybe<Scalars['Boolean']>;
   id: Scalars['Int'];
 };
@@ -241,6 +305,22 @@ export type QuoteType = {
   isOut: Scalars['Boolean'];
   post?: Maybe<PostType>;
   user?: Maybe<UserType>;
+};
+
+export type ReportType = {
+  __typename?: 'ReportType';
+  closed: Scalars['Boolean'];
+  fromPost?: Maybe<PostType>;
+  id: Scalars['Int'];
+  max: Scalars['Int'];
+  name?: Maybe<Scalars['String']>;
+};
+
+export type ReportItemType = {
+  __typename?: 'ReportItemType';
+  id: Scalars['Int'];
+  user?: Maybe<UserType>;
+  verified: Scalars['Boolean'];
 };
 
 export type GroupInfoType = {
@@ -535,6 +615,78 @@ export type GroupInfoTypeSort = {
   withFilter?: Maybe<SortOperationKind>;
 };
 
+export type ReportTypeFilter = {
+  AND?: Maybe<Array<ReportTypeFilter>>;
+  closed?: Maybe<Scalars['Boolean']>;
+  closed_not?: Maybe<Scalars['Boolean']>;
+  id?: Maybe<Scalars['Int']>;
+  id_gt?: Maybe<Scalars['Int']>;
+  id_gte?: Maybe<Scalars['Int']>;
+  id_in?: Maybe<Array<Scalars['Int']>>;
+  id_lt?: Maybe<Scalars['Int']>;
+  id_lte?: Maybe<Scalars['Int']>;
+  id_not?: Maybe<Scalars['Int']>;
+  id_not_gt?: Maybe<Scalars['Int']>;
+  id_not_gte?: Maybe<Scalars['Int']>;
+  id_not_in?: Maybe<Array<Scalars['Int']>>;
+  id_not_lt?: Maybe<Scalars['Int']>;
+  id_not_lte?: Maybe<Scalars['Int']>;
+  max?: Maybe<Scalars['Int']>;
+  max_gt?: Maybe<Scalars['Int']>;
+  max_gte?: Maybe<Scalars['Int']>;
+  max_in?: Maybe<Array<Scalars['Int']>>;
+  max_lt?: Maybe<Scalars['Int']>;
+  max_lte?: Maybe<Scalars['Int']>;
+  max_not?: Maybe<Scalars['Int']>;
+  max_not_gt?: Maybe<Scalars['Int']>;
+  max_not_gte?: Maybe<Scalars['Int']>;
+  max_not_in?: Maybe<Array<Scalars['Int']>>;
+  max_not_lt?: Maybe<Scalars['Int']>;
+  max_not_lte?: Maybe<Scalars['Int']>;
+  name?: Maybe<Scalars['String']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_ends_with?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name_not?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_not_ends_with?: Maybe<Scalars['String']>;
+  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name_not_starts_with?: Maybe<Scalars['String']>;
+  name_starts_with?: Maybe<Scalars['String']>;
+  OR?: Maybe<Array<ReportTypeFilter>>;
+};
+
+export type ReportTypeSort = {
+  closed?: Maybe<SortOperationKind>;
+  id?: Maybe<SortOperationKind>;
+  max?: Maybe<SortOperationKind>;
+  name?: Maybe<SortOperationKind>;
+};
+
+export type ReportItemTypeFilter = {
+  AND?: Maybe<Array<ReportItemTypeFilter>>;
+  id?: Maybe<Scalars['Int']>;
+  id_gt?: Maybe<Scalars['Int']>;
+  id_gte?: Maybe<Scalars['Int']>;
+  id_in?: Maybe<Array<Scalars['Int']>>;
+  id_lt?: Maybe<Scalars['Int']>;
+  id_lte?: Maybe<Scalars['Int']>;
+  id_not?: Maybe<Scalars['Int']>;
+  id_not_gt?: Maybe<Scalars['Int']>;
+  id_not_gte?: Maybe<Scalars['Int']>;
+  id_not_in?: Maybe<Array<Scalars['Int']>>;
+  id_not_lt?: Maybe<Scalars['Int']>;
+  id_not_lte?: Maybe<Scalars['Int']>;
+  OR?: Maybe<Array<ReportItemTypeFilter>>;
+  verified?: Maybe<Scalars['Boolean']>;
+  verified_not?: Maybe<Scalars['Boolean']>;
+};
+
+export type ReportItemTypeSort = {
+  id?: Maybe<SortOperationKind>;
+  verified?: Maybe<SortOperationKind>;
+};
+
 
 /** A connection to a list of items. */
 export type UserTypeConnection = {
@@ -549,12 +701,12 @@ export type UserTypeConnection = {
 };
 
 /** A connection to a list of items. */
-export type GroupInfoTypeConnection = {
-  __typename?: 'GroupInfoTypeConnection';
+export type ReportItemTypeConnection = {
+  __typename?: 'ReportItemTypeConnection';
   /** A list of edges. */
-  edges?: Maybe<Array<GroupInfoTypeEdge>>;
+  edges?: Maybe<Array<ReportItemTypeEdge>>;
   /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<GroupInfoType>>>;
+  nodes?: Maybe<Array<Maybe<ReportItemType>>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
@@ -579,6 +731,30 @@ export type PostTypeConnection = {
   edges?: Maybe<Array<PostTypeEdge>>;
   /** A flattened list of the nodes. */
   nodes?: Maybe<Array<Maybe<PostType>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** A connection to a list of items. */
+export type GroupInfoTypeConnection = {
+  __typename?: 'GroupInfoTypeConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<GroupInfoTypeEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<GroupInfoType>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** A connection to a list of items. */
+export type ReportTypeConnection = {
+  __typename?: 'ReportTypeConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<ReportTypeEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<ReportType>>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
@@ -612,6 +788,33 @@ export type UserTypeEdge = {
 };
 
 /** An edge in a connection. */
+export type ReportTypeEdge = {
+  __typename?: 'ReportTypeEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<ReportType>;
+};
+
+/** An edge in a connection. */
+export type ReportItemTypeEdge = {
+  __typename?: 'ReportItemTypeEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<ReportItemType>;
+};
+
+/** An edge in a connection. */
+export type QuoteTypeEdge = {
+  __typename?: 'QuoteTypeEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<QuoteType>;
+};
+
+/** An edge in a connection. */
 export type PostTypeEdge = {
   __typename?: 'PostTypeEdge';
   /** A cursor for use in pagination. */
@@ -629,35 +832,22 @@ export type GroupInfoTypeEdge = {
   node?: Maybe<GroupInfoType>;
 };
 
-/** An edge in a connection. */
-export type QuoteTypeEdge = {
-  __typename?: 'QuoteTypeEdge';
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<QuoteType>;
-};
-
-export type StatType = {
-  __typename?: 'StatType';
-  statFloor?: Maybe<Array<Maybe<StatFloorType>>>;
-  statQuotes?: Maybe<Array<Maybe<StatQuoteType>>>;
-};
-
-
-export type RoleType = {
-  __typename?: 'RoleType';
+export type Group = {
+  __typename?: 'Group';
   buildNumber?: Maybe<Scalars['String']>;
+  configJson?: Maybe<Scalars['String']>;
+  configuration?: Maybe<Config>;
+  groupId: Scalars['Long'];
   id: Scalars['Int'];
+  key?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
-  role: Scalars['Int'];
-};
-
-export type GroupResponseType = {
-  __typename?: 'GroupResponseType';
-  groups?: Maybe<Array<Maybe<GroupType>>>;
+  posts?: Maybe<Array<Maybe<Post>>>;
+  reports?: Maybe<Array<Maybe<Report>>>;
+  roles?: Maybe<Array<Maybe<GroupRole>>>;
+  secret?: Maybe<Scalars['String']>;
   token?: Maybe<Scalars['String']>;
 };
+
 
 export type GroupInfoTypeInput = {
   buildNumber?: Maybe<Scalars['String']>;
@@ -673,25 +863,24 @@ export type GroupInfoTypeInput = {
   withFilter?: Maybe<Scalars['Boolean']>;
 };
 
-export type Group = {
-  __typename?: 'Group';
-  buildNumber?: Maybe<Scalars['String']>;
-  configJson?: Maybe<Scalars['String']>;
-  configuration?: Maybe<Config>;
-  groupId: Scalars['Long'];
-  id: Scalars['Int'];
-  key?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-  posts?: Maybe<Array<Maybe<Post>>>;
-  roles?: Maybe<Array<Maybe<GroupRole>>>;
-  secret?: Maybe<Scalars['String']>;
+export type GroupResponseType = {
+  __typename?: 'GroupResponseType';
+  groups?: Maybe<Array<Maybe<GroupType>>>;
   token?: Maybe<Scalars['String']>;
 };
 
-export type StatFloorType = {
-  __typename?: 'StatFloorType';
-  count: Scalars['Int'];
-  floor: Scalars['Int'];
+export type RoleType = {
+  __typename?: 'RoleType';
+  buildNumber?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  name?: Maybe<Scalars['String']>;
+  role: Scalars['Int'];
+};
+
+export type StatType = {
+  __typename?: 'StatType';
+  statFloor?: Maybe<Array<Maybe<StatFloorType>>>;
+  statQuotes?: Maybe<Array<Maybe<StatQuoteType>>>;
 };
 
 export type StatQuoteType = {
@@ -700,12 +889,29 @@ export type StatQuoteType = {
   date?: Maybe<Scalars['String']>;
 };
 
-export type GroupRole = {
-  __typename?: 'GroupRole';
-  group: Group;
+export type StatFloorType = {
+  __typename?: 'StatFloorType';
+  count: Scalars['Int'];
+  floor: Scalars['Int'];
+};
+
+export type Config = {
+  __typename?: 'Config';
+  enabled: Scalars['Boolean'];
+  filterPattern?: Maybe<Scalars['String']>;
+  keyboard: Scalars['Boolean'];
+  withFilter: Scalars['Boolean'];
+};
+
+export type Report = {
+  __typename?: 'Report';
+  closed: Scalars['Boolean'];
+  fromPost?: Maybe<Post>;
+  group?: Maybe<Group>;
   id: Scalars['Int'];
-  role: UserRole;
-  user: User;
+  items?: Maybe<Array<Maybe<ReportItem>>>;
+  max: Scalars['Int'];
+  name?: Maybe<Scalars['String']>;
 };
 
 export type Post = {
@@ -721,21 +927,13 @@ export type Post = {
   time: Scalars['DateTime'];
 };
 
-export type Config = {
-  __typename?: 'Config';
-  enabled: Scalars['Boolean'];
-  filterPattern?: Maybe<Scalars['String']>;
-  keyboard: Scalars['Boolean'];
-  withFilter: Scalars['Boolean'];
+export type GroupRole = {
+  __typename?: 'GroupRole';
+  group: Group;
+  id: Scalars['Int'];
+  role: UserRole;
+  user: User;
 };
-
-export enum UserRole {
-  User = 'USER',
-  Groupmoder = 'GROUPMODER',
-  Groupadmin = 'GROUPADMIN',
-  Moder = 'MODER',
-  Admin = 'ADMIN'
-}
 
 export type User = {
   __typename?: 'User';
@@ -749,6 +947,13 @@ export type User = {
   vkId: Scalars['Long'];
 };
 
+export enum UserRole {
+  User = 'USER',
+  Groupmoder = 'GROUPMODER',
+  Groupadmin = 'GROUPADMIN',
+  Moder = 'MODER',
+  Admin = 'ADMIN'
+}
 
 export type Quote = {
   __typename?: 'Quote';
@@ -758,4 +963,14 @@ export type Quote = {
   post?: Maybe<Post>;
   time: Scalars['DateTime'];
   user?: Maybe<User>;
+};
+
+
+export type ReportItem = {
+  __typename?: 'ReportItem';
+  fromQuote?: Maybe<Quote>;
+  id: Scalars['Int'];
+  report?: Maybe<Report>;
+  user?: Maybe<User>;
+  verified: Scalars['Boolean'];
 };

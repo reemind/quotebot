@@ -1,7 +1,8 @@
 import { message } from "antd";
 import { gql, ApolloClient } from "@apollo/client";
-import { MutationType, MutationTypeSwitchQuoteValArgs } from '../../generated/graphql'
+import { MutationType, MutationTypeSwitchQuoteValArgs, MutationTypeSwitchVerificationValArgs } from '../../generated/graphql'
 import './User.sass'
+import { EDIT_QUOTE_TYPE, EDIT_VERIFICATION_TYPE } from "../../generated/mutations";
 
 const key = "SwitchMes"
 
@@ -15,13 +16,9 @@ const mesSuccess = () => {
     message.success({ key, content: "Success", duration: 2 })
 };
 
-const EDIT_QUOTE_TYPE = gql`
-mutation EditUserType($id: Int!, $forAdmin: Boolean) {
-    switchQuoteVal(id: $id, forAdmin: $forAdmin)
-}`;
 
 
-async function SwitchQuote(client: ApolloClient<object>, id, callback: () => void, all?: boolean) {
+export async function SwitchQuote(client: ApolloClient<object>, id, callback: () => void, all?: boolean) {
     mesloading()
     await client.mutate<MutationType,MutationTypeSwitchQuoteValArgs>({mutation: EDIT_QUOTE_TYPE, variables: { id, forAdmin: all }})
     .then(t => {
@@ -34,4 +31,15 @@ async function SwitchQuote(client: ApolloClient<object>, id, callback: () => voi
     }).catch(() => mesError())
 }
 
-export default SwitchQuote
+export async function SwitchVerification(client: ApolloClient<object>, id, callback: () => void, all?: boolean) {
+    mesloading()
+    await client.mutate<MutationType, MutationTypeSwitchVerificationValArgs>({ mutation: EDIT_VERIFICATION_TYPE, variables: { id, forAdmin: all } })
+        .then(t => {
+            if (t.data?.switchVerificationVal) {
+                mesSuccess()
+                callback()
+            }
+            else
+                mesError()
+        }).catch(() => mesError())
+}

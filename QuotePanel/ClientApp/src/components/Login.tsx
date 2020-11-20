@@ -1,4 +1,5 @@
 import { GroupResponseType, QueryType, QueryTypeAuthGroupsArgs } from '../generated/graphql'
+import { GET_GROUPS_AUTH } from '../generated/queries'
 import React from 'react'
 import { gql, useQuery } from '@apollo/client'
 import { LoadingOutlined, CheckCircleOutlined } from '@ant-design/icons'
@@ -11,20 +12,10 @@ type LoginProps = {
     redirectUri: string
 }
 
-const GET_GROUPS = gql`
-    query authGroups($code: String!, $redirectUri: String!){
-        authGroups(code: $code, redirectUri: $redirectUri){
-        token
-        groups{
-            id
-            name
-            role
-        }
-    }
-}`;
+
 
 export const Login: React.FC<LoginProps> = ({ callback, code, redirectUri }) => {
-    const { data, loading, error } = useQuery<QueryType, QueryTypeAuthGroupsArgs>(GET_GROUPS, { variables: { code: code, redirectUri: redirectUri } })
+    const { data, loading, error } = useQuery<QueryType, QueryTypeAuthGroupsArgs>(GET_GROUPS_AUTH, { variables: { code: code, redirectUri: redirectUri } })
     if (!loading && data?.authGroups)
     {
         callback(data.authGroups)

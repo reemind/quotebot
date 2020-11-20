@@ -4,23 +4,11 @@ import { PageHeader, Space, Table } from "antd";
 import { useQuery, gql } from "@apollo/client";
 import { QueryType, QueryTypePostsArgs } from '../../generated/graphql'
 import { RepostTag } from "../comps/DataTags";
-
-const GET_POSTS = gql`
-query GetPosts{
-    posts {
-        nodes {
-            text
-            id
-            max
-            deleted
-            isRepost
-        }
-    }
-}`;
+import { GET_POSTS_DETAILED } from "../../generated/queries";
 
 
-export const PostsTable: React.FC<{ all?: boolean }> = ({ all }) => {
-    const { data, loading } = useQuery<QueryType, QueryTypePostsArgs>(GET_POSTS)
+export const Posts: React.FC<{ all?: boolean }> = ({ all }) => {
+    const { data, loading } = useQuery<QueryType, QueryTypePostsArgs>(GET_POSTS_DETAILED)
 
     return <React.Fragment>
     <PageHeader
@@ -54,4 +42,4 @@ export const PostsTable: React.FC<{ all?: boolean }> = ({ all }) => {
 
 }
 
-export default PostsTable
+export default Posts

@@ -4,29 +4,10 @@ import { Button, Col, Form, Input, message, PageHeader, Row, Switch } from "antd
 import React, { useState } from "react"
 import { RouteComponentProps } from "react-router-dom";
 import { MutationType, MutationTypeUpdateGroupArgs, QueryType, QueryTypeGroupInfoArgs } from "../../generated/graphql";
+import { UPDATE_GROUP } from "../../generated/mutations";
+import { GET_GROUP_INFO } from "../../generated/queries";
 
-const GET_GROUP_INFO = gql`
-query GetGroupInfo($id : Int, $forAdmin: Boolean, $newGroup: Boolean) {
-  groupInfo(id: $id, forAdmin: $forAdmin, newGroup: $newGroup) {
-    name
-    enabled
-    keyboard
-    groupId
-    key
-    secret
-    token
-    withFilter
-    filterPattern
-    buildNumber
-  }
-}
-`;
 
-const UPDATE_GROUP = gql`
-mutation UpdateGroup($inputGroup: GroupInfoTypeInput, $id : Int, $forAdmin: Boolean, $newGroup: Boolean) {
-  updateGroup(inputGroup: $inputGroup, id : $id, forAdmin: $forAdmin, newGroup: $newGroup)
-}
-`;
 
 const successMes = () => {
     message.success('Success');

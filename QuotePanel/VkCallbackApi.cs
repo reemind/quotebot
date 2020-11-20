@@ -325,12 +325,18 @@ namespace QuotePanel
         {
             bool result = true;
 
-            var groups = context.GetQuotes(post)
-                .Include(t => t.User.House)
+            var report = context.CreateReport(group, post);
+            var reportQuotes = context.GetReportItems(report).Include(t => t.FromQuote.User);
+            var quotes = context.GetQuotes(post)
+                .Include(t => t.User)
                 .Where(t => !t.IsOut)
                 .Take(post.Max)
+                .Except(reportQuotes.Select(t => t.FromQuote));
+            var groups = quotes
+                .Include(t => t.User.House)
                 .Select(t => t.User)
                 .AsEnumerable().GroupBy(t => t.House);
+            context.AddReportItems(report, quotes.AsEnumerable());
 
             foreach (var gr in groups)
                 try

@@ -5,52 +5,12 @@ import { Button, Col, Input, message, PageHeader, Radio, Row, Space, Table, Moda
 import { useQuery, gql, useMutation, useApolloClient, useLazyQuery } from "@apollo/client";
 import { QueryType, QueryTypeUserArgs, MutationTypeEditUserInfoArgs, MutationType, QueryTypeUserRolesArgs, QueryTypeGroupsArgs, MutationTypeRemoveRoleArgs } from '../../generated/graphql'
 import './User.sass'
-import SwitchQuote from "./Quote";
+import { SwitchQuote } from "./Quote";
 import { OutTag, RoleTag } from "../comps/DataTags";
+import { GET_GROUPS, GET_ROLES, GET_USER } from "../../generated/queries";
+import { DELETE_USER_ROLE, EDIT_USER_TYPE } from "../../generated/mutations";
 
-const GET_USER = gql`
-query GetUser($id: Int!, $forAdmin: Boolean) {
-    user(id: $id, forAdmin: $forAdmin) {
-        id
-        name
-        room
-        role
-        vkId
-    }
-    qoutesByUser(id: $id, forAdmin: $forAdmin) {
-        nodes {
-            id
-            isOut
-            post {
-                text,
-                max
-                id
-            }
-        }
-    } 
-}`;
 
-const GET_GROUPS = gql`
-query GetPosts{
-    groups {
-        nodes {
-            id
-            name
-buildNumber
-        }
-    }
-}
-`;
-
-const GET_ROLES = gql`
-query GetRoles($id: Int!) {
-  userRoles(id: $id) {
-      id
-      buildNumber
-      role
-  }
-}
-`;
 
 const successMes = () => {
     message.success('Success');
@@ -59,16 +19,6 @@ const successMes = () => {
 const errorMes = () => {
     message.error('Error');
 };
-
-const EDIT_USER_TYPE = gql`
-mutation EditUserType($id: Int!, $newType: Int, $newName: String, $forAdmin: Boolean, $groupId: Int) {
-  editUserInfo(id: $id, newType: $newType, newName: $newName, forAdmin: $forAdmin, groupId: $groupId)
-}`;
-
-const DELETE_USER_ROLE = gql`
-mutation RemoveRole($id: Int!) {
-  removeRole(id: $id)
-}`;
 
 interface RouterProps { // type for `match.params`
     id: string; // must be type `string` since value comes from the URL

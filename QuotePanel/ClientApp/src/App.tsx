@@ -7,19 +7,11 @@ import { Home } from './components/Home';
 import { gql, useQuery } from '@apollo/client';
 import { QueryType } from './generated/graphql';
 import { message } from 'antd';
+import { GET_PROFILE } from './generated/queries';
 //import 'antd/dist/antd.css';
 
 
-const GET_PROFILE = gql`
-query GetProfile
-{
-  profile{
-    id
-    name
-    role
-  }
-}
-`;
+
 
 const App: React.FC = (props) => {
     const history = useHistory()

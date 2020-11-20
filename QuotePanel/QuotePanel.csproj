@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="5.4.2" />
     <PackageReference Include="HotChocolate" Version="10.5.3" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="10.5.3" />
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="10.5.3" />
@@ -33,7 +34,11 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\components\comps\DataTags.tsx" />
+    <None Remove="ClientApp\src\components\panel\Report.tsx" />
     <None Remove="ClientApp\src\components\panel\Settings.tsx~RF20fd09a0.TMP" />
+    <None Remove="ClientApp\src\components\Reports.tsx" />
+    <None Remove="ClientApp\src\generated\mutations.tsx" />
+    <None Remove="ClientApp\src\generated\queries.tsx" />
   </ItemGroup>
   
   <ItemGroup>
@@ -43,6 +48,10 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\components\comps\DataTags.tsx" />
     <TypeScriptCompile Include="ClientApp\src\components\Home.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\panel\Report.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\panel\Reports.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\generated\mutations.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\generated\queries.tsx" />
   </ItemGroup>
 
   <ItemGroup>

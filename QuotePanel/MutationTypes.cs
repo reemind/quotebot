@@ -67,12 +67,12 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public bool EditUserInfo(int id, int? newType, string newName, bool? forAdmin, int? groupId)
         {
-            if(IsMainModer(forAdmin))
+            if (IsMainModer(forAdmin))
             {
                 var user = context.Users.Find(id);
                 var group = context.Groups.Find(groupId);
 
-                if (user is null || 
+                if (user is null ||
                     (string.IsNullOrWhiteSpace(newName) && group is null) ||
                     (context.GetGroupRole(group, user)?.Role ?? UserRole.User) >= role)
                     return false;
@@ -80,8 +80,8 @@ namespace QuotePanel.QueryTypes
                 if (!string.IsNullOrWhiteSpace(newName))
                     user.Name = newName;
 
-                if (newType.HasValue && 
-                    newType.Value >= 0 && 
+                if (newType.HasValue &&
+                    newType.Value >= 0 &&
                     newType.Value < 5 &&
                     newType <= (int)role)
                     context.SetRole(group, user, (UserRole)newType);
@@ -95,11 +95,11 @@ namespace QuotePanel.QueryTypes
 
             if (groupRole is null || groupRole.Role >= role || newType > (int)role)
                 return false;
-            
 
-            if(!string.IsNullOrWhiteSpace(newName))
+
+            if (!string.IsNullOrWhiteSpace(newName))
                 groupRole.User.Name = newName;
-            if(newType.HasValue && newType.Value >= 0 && newType.Value < 5)
+            if (newType.HasValue && newType.Value >= 0 && newType.Value < 5)
                 groupRole.Role = (UserRole)newType.Value;
 
             context.SaveChanges();
@@ -120,18 +120,86 @@ namespace QuotePanel.QueryTypes
             return true;
         }
 
+        public async Task<int> CreateFromToken(string groupName, string token)
+        {
+            var vk = new VkApi();
+            await vk.AuthorizeAsync(new ApiAuthParams
+            {
+                AccessToken = token
+            });
+
+            if (!vk.IsAuthorized)
+                return 0;
+
+            var groups = await vk.Groups.GetByIdAsync(null, groupName, VkNet.Enums.Filters.GroupsFields.All);
+
+            if (groups.Count == 0)
+                return 0;
+
+            var group = groups.First();
+
+            if (context.Groups.FirstOrDefault(t => t.GroupId == group.Id) != null)
+                return 0;
+
+            var code = await vk.Groups.GetCallbackConfirmationCodeAsync((ulong)group.Id);
+            context.Groups.Add(new Data.Group()
+            {
+                Name = group.Name,
+                Token = token,
+                GroupId = group.Id,
+                Configuration = new Config
+                {
+                    Enabled = true,
+                    FilterPattern = "[Уу]частвую",
+                    Keyboard = false,
+                    WithFilter = true
+                },
+                Key = code,
+                BuildNumber = "NotSet",
+                Secret = null
+            });
+            await context.SaveChangesAsync();
+
+            foreach (var serverCallback in await vk.Groups.GetCallbackServersAsync((ulong)group.Id, null))
+                if (serverCallback.Title == "QuoteBot")
+                    await vk.Groups.DeleteCallbackServerAsync((ulong)group.Id, (ulong)serverCallback.Id);
+
+            var server = await vk.Groups.AddCallbackServerAsync((ulong)group.Id,
+                @"https://vds.nexagon.ru/vk/api",
+                "QuoteBot");
+
+            var version = new VkNet.Infrastructure.VkApiVersionManager();
+            version.SetVersion(5, 103);
+
+
+
+            await vk.Groups.SetCallbackSettingsAsync(new VkNet.Model.RequestParams.CallbackServerParams
+            {
+                ApiVersion = version,
+                GroupId = (ulong)group.Id,
+                ServerId = server,
+                CallbackSettings = new CallbackSettings()
+                {
+                    MessageNew = true,
+                    WallReplyNew = true,
+                    WallPostNew = true,
+                    WallReplyDelete = true,
+
+                }
+            });
+
+            return context.Groups.FirstOrDefault(t => t.GroupId == group.Id)?.Id ?? 0;
+        }
+
         [Authorize(Policy = "GroupModer")]
         public bool EditPostInfo(int id, int? newMax, string newName)
         {
-            var groupId = int.Parse(httpContext.HttpContext.User.Claims.First(t => t.Type == "GroupId").Value);
-            var group = context.Groups.Single(t => t.Id == groupId);
-
             var post = context.GetPosts(group).SingleOrDefault(t => t.Id == id);
 
-            if(post is null)
+            if (post is null)
                 return false;
 
-            if(newMax.HasValue && newMax.Value > 0 && newMax.Value < 201)
+            if (newMax.HasValue && newMax.Value > 0 && newMax.Value < 201)
                 post.Max = newMax.Value;
 
             if (!string.IsNullOrWhiteSpace(newName))
@@ -149,10 +217,27 @@ namespace QuotePanel.QueryTypes
 
             var quote = context.Quotes.SingleOrDefault(t => (IsMainModer(forAdmin) || t.Post.Group == group) && t.Id == id);
 
-            if(quote is null)
+            if (quote is null)
                 return false;
 
             quote.IsOut = !quote.IsOut;
+            context.SaveChanges();
+
+            return true;
+        }
+
+        [Authorize(Policy = "GroupModer")]
+        public bool SwitchVerificationVal(int id, bool? forAdmin)
+        {
+
+            var reportItem = context.ReportItems
+                .Include(t => t.Report)
+                .SingleOrDefault(t => (IsMainModer(forAdmin) || t.Report.Group == group) && t.Id == id);
+
+            if (reportItem is null || reportItem.Report.Closed)
+                return false;
+
+            reportItem.Verified = !reportItem.Verified;
             context.SaveChanges();
 
             return true;
@@ -181,19 +266,19 @@ namespace QuotePanel.QueryTypes
             if (!string.IsNullOrWhiteSpace(inputGroup.Token))
                 group.Token = inputGroup.Token;
 
-            if(!string.IsNullOrWhiteSpace(inputGroup.Key))
+            if (!string.IsNullOrWhiteSpace(inputGroup.Key))
                 group.Key = inputGroup.Key;
 
-            if(inputGroup.Secret != null)
-                group.Secret = inputGroup.Secret == ""?null:inputGroup.Secret;
+            if (inputGroup.Secret != null)
+                group.Secret = inputGroup.Secret == "" ? null : inputGroup.Secret;
 
-            if(inputGroup.Keyboard.HasValue)
+            if (inputGroup.Keyboard.HasValue)
                 group.Configuration.Keyboard = inputGroup.Keyboard.Value;
 
-            if(inputGroup.Enabled.HasValue)
+            if (inputGroup.Enabled.HasValue)
                 group.Configuration.Enabled = inputGroup.Enabled.Value;
 
-            if(inputGroup.WithFilter.HasValue)
+            if (inputGroup.WithFilter.HasValue)
                 group.Configuration.WithFilter = inputGroup.WithFilter.Value;
 
             if (inputGroup.FilterPattern != null)
@@ -201,57 +286,69 @@ namespace QuotePanel.QueryTypes
 
             group.Configuration = group.Configuration;
 
-            if(inputGroup.Name != null)
+            if (inputGroup.Name != null)
                 group.Name = inputGroup.Name;
 
             if (nGroup)
                 context.Add(group);
-            
+
             context.SaveChanges();
 
             return true;
         }
 
         [Authorize(Policy = "GroupModer")]
-        public bool NotifyUsers(int postId, IEnumerable<int> quotesId)
+        public int NotifyUsers(int postId, IEnumerable<int> quotesId)
         {
-            var result = true;
+            var result = 0;
 
-            var post = context.Posts.Include(t => t.BindTo).SingleOrDefault(t => t.Id == postId) ;
-            if(post is null || post.BindTo is Post)
-                return false;
+            var post = context.Posts.Include(t => t.BindTo).SingleOrDefault(t => t.Id == postId);
+            if (post is null || post.BindTo is Post)
+                return 0;
 
-            var groups = context.GetQuotes(post).Include(t => t.User.House)
-                .Where(t => quotesId.Contains(t.Id)).Select(t => t.User)
+            var report = context.CreateReport(group, post);
+            var reportQuotes = context.GetReportItems(report).Include(t => t.FromQuote.User);
+            var quotes = context.GetQuotes(post)
+                .Include(t => t.User)
+                .Where(t => quotesId.Contains(t.Id))
+                .Except(reportQuotes.Select(t => t.FromQuote));
+            var groups = quotes.Include(t => t.User.House)
+                .Select(t => t.User)
                 .AsEnumerable()
                 .GroupBy(t => t.House);
 
+            var quotesForReports = quotes.ToList();
 
             foreach (var gr in groups)
-            try
-            {
-                var api = new VkApi();
-                api.Authorize(new ApiAuthParams() { AccessToken = gr.Key.Token });
-
-                if (!api.IsAuthorized)
-                    return false;
-
-                var prms = new VkNet.Model.RequestParams.MessagesSendParams
+                try
                 {
-                    RandomId = (int)DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                    UserIds = gr.Select(t => t.VkId),
-                    Message = "Ты участвуешь!",
-                    Attachments = new List<MessagePost> { new MessagePost(post) }
-                };
+                    var api = new VkApi();
+                    api.Authorize(new ApiAuthParams() { AccessToken = gr.Key.Token });
 
-                api.Messages.SendToUserIds(prms);
-            }
-            catch
-            {
-                result = false;
-            }
+                    if (!api.IsAuthorized)
+                        return 0;
 
-            return result;
+                    var prms = new VkNet.Model.RequestParams.MessagesSendParams
+                    {
+                        RandomId = (int)DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        UserIds = gr.Select(t => t.VkId),
+                        Message = "Ты участвуешь!",
+                        Attachments = new List<MessagePost> { new MessagePost(post) }
+                    };
+
+                    var sendResults = api.Messages.SendToUserIds(prms);
+
+                    foreach (var res in sendResults)
+                        quotesForReports.RemoveAll(t => res.PeerId == t.User.Id);
+                }
+                catch
+                {
+                    result = 0;
+                }
+
+            context.AddReportItems(report, quotesForReports);
+
+            return quotesForReports.Count;
         }
 
         [Authorize(Policy = "GroupModer")]
@@ -295,7 +392,7 @@ namespace QuotePanel.QueryTypes
                                .Where(t => usersIds.Contains(t.Id) && (IsMainModer(forAdmin) || t.House == group))
                                .AsEnumerable().GroupBy(t => t.House);
 
-            foreach(var gr in users)
+            foreach (var gr in users)
             {
                 var api = new VkApi();
                 api.Authorize(new ApiAuthParams() { AccessToken = gr.Key.Token });
@@ -321,6 +418,47 @@ namespace QuotePanel.QueryTypes
             }
 
             return result;
+        }
+
+        [Authorize(Policy = "GroupModer")]
+        public int CreateReport(int postId, List<int> quoteIds)
+        {
+            var post = context.Posts
+                .Include(t => t.Quotes)
+                .FirstOrDefault(t => t.Id == postId && t.Group == group);
+
+            if (post == null)
+                return 0;
+
+            //var quotes = post.Quotes.Where(t => quoteIds.Contains(t.Id));
+            return context.CreateReport(group, post)?.Id ?? 0;
+        }
+
+        public bool CloseReport(int id, bool? forAdmin)
+        {
+            var report = context.Reports.Include(t => t.FromPost).SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == group) && t.Id == id);
+
+            if (report is null)
+                return false;
+
+            report.FromPost.Deleted = true;
+            report.Closed = true;
+            context.SaveChanges();
+
+            return true;
+        }
+
+        public bool DeletePost(int id, bool? forAdmin)
+        {
+            var post = context.GetPosts(group).SingleOrDefault(t => t.Id == id);
+
+            if (post is null)
+                return false;
+
+            post.Deleted = true;
+            context.SaveChanges();
+
+            return true;
         }
     }
 }

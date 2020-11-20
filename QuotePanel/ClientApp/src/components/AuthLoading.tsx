@@ -4,16 +4,12 @@ import { gql, useQuery } from '@apollo/client'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Result, Button } from 'antd'
 import { Link } from 'react-router-dom'
+import { GET_TOKEN } from '../generated/queries'
 
 type LoginProps = {
     callback: (response: string) => void
     id: number,
 }
-
-const GET_TOKEN = gql`
-    query GetToken($groupId: Long!){
-        token(groupId: $groupId)
-}`;
 
 export const AuthLoading: React.FC<LoginProps> = ({ callback, id }) => {
     const {data, loading, error} = useQuery<{token: string},QueryTypeTokenArgs>(GET_TOKEN, { variables: { groupId: id } })

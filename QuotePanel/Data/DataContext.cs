@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace QuotePanel.Data
 {
@@ -17,10 +18,15 @@ namespace QuotePanel.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Quote> Quotes { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<ReportItem> ReportItems { get; set; }
+
+
 
         public DataContext(DbContextOptions options) : base(options)
         {
             Database.EnsureCreated();
+            var str = Database.GenerateCreateScript();
         }
 
         public IQueryable<Post> GetPosts(Group group)
@@ -61,6 +67,15 @@ namespace QuotePanel.Data
 
         public IQueryable<User> GetUsers(Group group)
             => GroupsRoles.Where(t => t.Group == group).Select(t => t.User);
+
+        public IQueryable<Report> GetReports(Group group)
+            => Reports.Include(t => t.FromPost).Where(t => t.Group == group);
+
+        public Report GetReport(Group group, int id)
+            => Reports.Include(t => t.FromPost).FirstOrDefault(t => t.Group == group && t.Id == id);
+
+        public IQueryable<ReportItem> GetReportItems(Report report)
+            => ReportItems.Include(t => t.User).Where(t => t.Report == report);
 
         public bool InGroup(User user, Group group)
             => GroupsRoles
@@ -103,6 +118,38 @@ namespace QuotePanel.Data
 
         public bool ExistUser(long id)
             => GetUser(id) != null;
+
+        public Report CreateReport(Group group, Post post)
+        {
+            var report = Reports.Include(t => t.Items).FirstOrDefault(t => t.FromPost == post);
+
+            if (report == null)
+                Add(report = new Report()
+                {
+                    Group = group,
+                    Max = post.Max,
+                    Name = post.Text,
+                    FromPost = post
+                });             
+            
+            SaveChanges();
+            return report;
+        }
+
+        public void AddReportItems(Report report, IEnumerable<Quote> quotes)
+        {
+            var items = quotes.Select(t => new ReportItem
+            {
+                User = t.User,
+                Verified = false,
+                FromQuote = t,
+                Report = report
+            }).ToList();
+
+            AddRange(items);
+
+            SaveChanges();
+        }
     }
 
     public class Group
@@ -115,6 +162,7 @@ namespace QuotePanel.Data
         public string Name { get; set; }
         public List<GroupRole> Roles { get; set; }
         public List<Post> Posts { get; set; }
+        public List<Report> Reports { get; set; }
 
         public string BuildNumber { get; set; }
         [NotMapped]
@@ -202,5 +250,43 @@ namespace QuotePanel.Data
         public bool IsOut { get; set; }
         public Post Post { get; set; }
         public DateTime Time { get; set; }
+    }
+
+    public class Report
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Max { get; set; }
+        public Post FromPost { get; set; }
+        public List<ReportItem> Items { get; set; }
+        public Group Group { get; set; }
+        public bool Closed { get; set; }
+    }
+
+    public class ReportItem
+    {
+        public int Id { get; set; }
+        public Report Report { get; set; }
+        public User User { get; set; }
+        public Quote FromQuote { get; set; }
+        public bool Verified { get; set; }
+
+    }
+
+    public class ReportItemComparer : IEqualityComparer<ReportItem>
+    {
+        public static ReportItemComparer New => new ReportItemComparer();
+
+
+        public bool Equals(ReportItem x, ReportItem y)
+        {
+            return x.FromQuote == y.FromQuote;
+        }
+
+        public int GetHashCode([DisallowNull] ReportItem obj)
+        {
+            return base.GetHashCode();
+        }
+
     }
 }

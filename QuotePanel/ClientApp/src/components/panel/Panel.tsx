@@ -5,26 +5,19 @@ import { SettingOutlined, LogoutOutlined, DashboardOutlined, BorderlessTableOutl
 import { Redirect, useHistory, Switch, Route } from "react-router-dom";
 import Users from "./Users";
 import User from './User'
-import PostsTable from "./PostsTable";
+import Posts from "./PostsTable";
 import Post from "./Post";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { QueryType } from "../../generated/graphql";
 import Settings from "./Settings";
 import Dash from "./Dash";
 import MultipleActionsUsers from "./MultipleActionsUsers";
 import GroupsTable from "./admin/GroupsTable";
+import { GET_PROFILE } from "../../generated/queries";
+import { Reports } from "./Reports";
+import Report from "./Report";
 
 const { Header, Content, Sider } = Layout;
-
-const GET_PROFILE = gql`
-query GetProfile
-{
-  profile{
-    name
-    role
-  }
-}
-`;
 
 type ItemType = {
     path: string,
@@ -43,6 +36,10 @@ const ContentItems: ItemType[] = [
     {
         path: "/panel/posts",
         key: "posts"
+    },
+    {
+        path: "/panel/reports",
+        key: "reports"
     },
     {
         path: "/panel/admin/users",
@@ -81,6 +78,7 @@ const Panel: React.FC<{ onToggleTheme: () => string, theme: string }> = ({ onTog
                         <Menu.Item key="dash" icon={<DashboardOutlined />}>Dashboard</Menu.Item>
                         <Menu.Item key="users" icon={<BorderlessTableOutlined />}>Users</Menu.Item>
                         <Menu.Item key="posts" icon={<SnippetsOutlined />}>Posts</Menu.Item>
+                        <Menu.Item key="reports" icon={<SnippetsOutlined />}>Reports</Menu.Item>
                         {(data?.profile?.role ?? 0) > 2 &&
                             <Menu.SubMenu title="For Admins">
                                 <Menu.Item key="adm_dash" icon={<DashboardOutlined />}>Dashboard</Menu.Item>
@@ -135,19 +133,22 @@ const Panel: React.FC<{ onToggleTheme: () => string, theme: string }> = ({ onTog
                                 <Route path="/panel/user/:id" component={() => <User profileRole={data?.profile?.role ?? 0} />} />
                                 <Route path="/panel/users/multiple" component={() => <MultipleActionsUsers />} />
 
-                                <Route path="/panel/posts" component={() => <PostsTable />} />
+                                <Route path="/panel/posts" component={() => <Posts />} />
                                 <Route path="/panel/post/:id" component={() => <Post />} />
+
+                                <Route path="/panel/reports" component={() => <Reports />} />
+                                <Route path="/panel/report/:id" component={() => <Report />} />
 
                                 <Route path="/panel/settings" component={(props) => <Settings {...props} />} />
 
-
+                                
                                 <Route path="/panel/admin/dash" component={() => <Dash all />} />
 
                                 <Route exact path="/panel/admin/users" component={() => <Users all isMobile={isMobile} />} />
                                 <Route path="/panel/admin/user/:id" component={() => <User all profileRole={data?.profile?.role ?? 0} />} />
                                 <Route path="/panel/admin/users/multiple" component={() => <MultipleActionsUsers all />} />
 
-                                <Route path="/panel/admin/posts" component={() => <PostsTable all />} />
+                                <Route path="/panel/admin/posts" component={() => <Posts all />} />
                                 <Route path="/panel/admin/post/:id" component={() => <Post />} />
 
                                 <Route exact path="/panel/admin/groups" component={() => <GroupsTable />} />

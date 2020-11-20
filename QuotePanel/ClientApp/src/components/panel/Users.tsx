@@ -6,47 +6,9 @@ import { QueryType, QueryTypeUsersArgs, UserType } from '../../generated/graphql
 import { RoleTag } from "../comps/DataTags";
 import UsersTableDesktop from "../comps/desktop/UserTable";
 import UsersTableMobile from "../comps/mobile/UserTable";
+import { GET_USERS, GET_USERS_ALL } from "../../generated/queries";
 
-const GET_USERS = gql`
-query GetUsers {
-  users {
-    nodes {
-      id
-      name
-      room
-      role
-      buildNumber
-      group{
-        id
-        name
-      }
-    }
-    totalCount
-    pageInfo {
-      endCursor
-    }
-  }
-}`;
 
-const GET_USERS_ALL = gql`
-query GetUsers {
-  users(forAdmin : true) {
-    nodes {
-      id
-      name
-      room
-      buildNumber
-      group{
-        id
-        name
-      }
-    }
-    totalCount
-    pageInfo {
-      endCursor
-    }
-  }
-}`;
 
 
 

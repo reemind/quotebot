@@ -1,48 +1,22 @@
 import React, { ReactText, useState } from "react";
-import { Redirect, Link, RouteComponentProps, withRouter } from "react-router-dom";
+import { Redirect, Link, RouteComponentProps, withRouter, useHistory } from "react-router-dom";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Button, Col, Drawer, Input, InputNumber, message, PageHeader, Row, Space, Table, Tag } from "antd";
+import { Button, Col, Drawer, Input, InputNumber, message, PageHeader, Popconfirm, Row, Space, Table, Tag } from "antd";
 import { useQuery, gql, useMutation, useApolloClient } from "@apollo/client";
-import { MutationType, MutationTypeEditPostInfoArgs, MutationTypeNotifyUsersArgs, QueryType, QueryTypeUserArgs } from '../../generated/graphql'
+import { MutationType, MutationTypeDeletePostArgs, MutationTypeEditPostInfoArgs, MutationTypeNotifyUsersArgs, QueryType, QueryTypeUserArgs } from '../../generated/graphql'
 import './User.sass'
-import SwitchQuote from "./Quote";
+import { SwitchQuote } from "./Quote";
 import { OutTag, RepostTag } from "../comps/DataTags";
+import { GET_POST } from "../../generated/queries";
+import { EDIT_POST_INFO, NOTIFY_USERS, DELETE_POST } from "../../generated/mutations";
 
-const GET_POST = gql`
-query GetPost($id: Int!) {
-  post(id: $id) {
-    id
-    max
-    text
-    isRepost
-  }
-  qoutesByPost(id: $id) {
-    nodes {
-      id
-      isOut
-      user {
-        name
-        room
-        id
-      }
-    }
-    totalCount
-  }
-}
-`;
-
-const EDIT_POST_INFO = gql`
-mutation EditPostMax($id: Int!, $newMax: Int, $newName: String) {
-  editPostInfo(id: $id, newMax: $newMax, newName: $newName)
-}`;
-
-const NOTIFY_USERS = gql`
-mutation NotifyUsers($postId: Int!, $quotesId: [Int!]) {
-  notifyUsers(postId: $postId, quotesId: $quotesId)
-}`;
 
 const successMes = () => {
     message.success('Success');
+};
+
+const successMesCount = (count) => {
+    message.success(`Success. ${count} user(s) added`);
 };
 
 const errorMes = () => {
@@ -63,6 +37,8 @@ interface PostProps extends RouteComponentProps<RouterProps> {
 
 export const Post: React.FC<PostProps> = ({ match }) => {
     const id: number = parseInt(match.params.id)
+
+    const history = useHistory()
     const [state, setState] = useState<{ max: number, drawer: boolean, name: string, selected: ReactText[] }>({
         max: 0,
         drawer: false,
@@ -88,10 +64,23 @@ export const Post: React.FC<PostProps> = ({ match }) => {
         onError: () => errorMes()
     })
 
+    const [deletePost, deleteData] = useMutation<MutationType, MutationTypeDeletePostArgs>(DELETE_POST, {
+        onCompleted: (dat) => {
+            if (dat.deletePost) {
+                successMes()
+                history.goBack()
+            }
+            else
+                errorMes()
+            refetch()
+        },
+        onError: () => errorMes()
+    })
+
     const [notify] = useMutation<MutationType, MutationTypeNotifyUsersArgs>(NOTIFY_USERS, {
         onCompleted: (value) => {
             if (value?.notifyUsers)
-                successMes()
+                successMesCount(value?.notifyUsers)
             else
                 errorMes()
             refetch()
@@ -125,7 +114,14 @@ export const Post: React.FC<PostProps> = ({ match }) => {
                         setState({ ...state, drawer: true, selected: [] })
                     }}>
                         Notify
-            </Button>,
+                    </Button>,
+                    <Popconfirm key="delete" title="Do you sure?" placement="bottomRight" onConfirm={() => {
+                        deletePost({ variables: { id } })
+                    }}>
+                        <Button danger>
+                            Close
+                        </Button>
+                    </Popconfirm>
                 ]}
             >
                 <Space align="baseline" size="large">

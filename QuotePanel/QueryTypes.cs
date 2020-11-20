@@ -337,6 +337,31 @@ namespace QuotePanel.QueryTypes
                 FilterPattern = group.Configuration.FilterPattern
             };
         }
+
+        [Authorize(Policy = "GroupModer")]
+        [UsePaging]
+        [UseFiltering]
+        [UseSorting]
+        public IQueryable<ReportType> GetReports()
+            => context.GetReports(group).Select(t => t.ToReportType());
+
+        [Authorize(Policy = "GroupModer")]
+        public ReportType GetReport(int id)
+            => context.GetReport(group, id)?.ToReportType() ?? null;
+
+        [Authorize(Policy = "GroupModer")]
+        [UsePaging]
+        [UseFiltering]
+        [UseSorting]
+        public IQueryable<ReportItemType> GetReportItems(int id)
+        {
+            var report = context.GetReport(group, id);
+
+            if (report == null)
+                return null;
+
+            return context.GetReportItems(report).Select(t => t.ToReportItemType());
+        }
     }
 
 
@@ -369,6 +394,22 @@ namespace QuotePanel.QueryTypes
             IsOut = quote.IsOut,
             User = user is null ? null : user.ToUserType(role),
             Post = post is null ? null : post.ToPostType()
+        };
+
+        public static ReportType ToReportType(this Report report) => new ReportType
+        {
+            Id = report.Id,
+            Max = report.Max,
+            Name = report.Name,
+            FromPost = report.FromPost.ToPostType(),
+            Closed = report.Closed
+        };
+
+        public static ReportItemType ToReportItemType(this ReportItem reportItem) => new ReportItemType
+        {
+            Id = reportItem.Id,
+            User = reportItem.User.ToUserType(UserRole.User),
+            Verified = reportItem.Verified
         };
     }
 
@@ -436,6 +477,22 @@ namespace QuotePanel.QueryTypes
         public PostType Post { get; set; }
         public bool IsOut { get; set; }
         public UserType User { get; set; }
+    }
+
+    public class ReportType
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Max { get; set; }
+        public PostType FromPost { get; set; }
+        public bool Closed { get; set; }
+    }
+
+    public class ReportItemType
+    {
+        public int Id { get; set; }
+        public UserType User { get; set; }
+        public bool Verified { get; set; }
     }
 
     public class StatType

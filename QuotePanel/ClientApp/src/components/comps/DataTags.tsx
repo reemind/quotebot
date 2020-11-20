@@ -31,3 +31,11 @@ export const OutTag: React.FC<{ isOut: boolean }> = ({ isOut }) => {
 export const RepostTag: React.FC = (props) => {
     return <Tag color="warning" {...props}>Repost</Tag>
 }
+
+export const VerifiedTag: React.FC<{ verified: boolean }> = ({ verified }) => {
+    return (<Tag color={verified ? "green" : "red"}>{verified ? "Verified" : "Not verified"}</Tag>)
+}
+
+export const ClosedTag: React.FC<{ closed: boolean }> = ({ closed }) => {
+    return (<Tag color={closed ? "red" : "green"}>{closed ? "Closed" : "Open"}</Tag>)
+}

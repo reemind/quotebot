@@ -5,34 +5,7 @@ import { MutationType, MutationTypeSendUsersArgs, QueryType, QueryTypeUsersArgs,
 import difference from 'lodash/difference';
 import TextArea from "antd/lib/input/TextArea";
 import { RepostTag } from "../comps/DataTags";
-
-const GET_USERS = gql`
-query GetUsers($forAdmin: Boolean) {
-  users(forAdmin: $forAdmin) {
-    nodes {
-      id
-      name
-      room
-      buildNumber
-    }
-    totalCount
-    pageInfo {
-      endCursor
-    }
-  }
-}`;
-
-const GET_POSTS = gql`
-query GetPosts{
-    posts {
-        nodes {
-            text
-            id
-            isRepost
-        }
-    }
-}
-`;
+import { GET_POSTS, GET_USERS } from "../../generated/queries";
 
 const SEND_MESSAGE_USERS = gql`
 mutation SendMessageUsers($message: String!, $usersIds: [Int!], $forAdmin: Boolean) {

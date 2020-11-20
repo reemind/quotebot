@@ -5,53 +5,8 @@ import React, { useState } from "react"
 import { QueryType, QueryTypeStatArgs } from "../../generated/graphql";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Area, AreaChart, ResponsiveContainer, } from 'recharts'
 import { EnabledTag } from "../comps/DataTags";
+import { GET_DASHBOARD_INFO, GET_DASHBOARD_INFO_ALL } from "../../generated/queries";
 
-
-const GET_DASHBOARD_INFO = gql`
-query GetGroupInfo {
-  groupInfo {
-    name
-    enabled
-    groupId
-  }
-  stat{
-    statFloor{
-      floor
-      count
-      }
-    statQuotes{
-      date
-      count
-      }
-  }
-}
-`;
-
-const GET_DASHBOARD_INFO_ALL = gql`
-query GetGroupsInfo($groupId: Int) {
-    groupInfo(id: $groupId) {
-        id
-        name
-        enabled
-        groupId
-      }
-      stat(forAdmin: true, groupId: $groupId){
-        statFloor{
-          floor
-          count
-          }
-        statQuotes{
-          date
-          count
-          }
-      }
-  groups {
-    nodes {
-      id
-      buildNumber
-    }
-  }
-}`;
 
 
 const Dash: React.FC<{ all?: boolean }> = ({ all }) => {

@@ -1,32 +1,53 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { PageHeader, Space, Table, Tag } from "antd";
-import { useQuery, gql } from "@apollo/client";
-import { QueryType, QueryTypeGroupsArgs } from '../../../generated/graphql'
-
-const GET_GROUPS = gql`
-query GetGroups{
-  groups {
-    nodes {
-      id
-      groupId
-      name
-      enabled
-      buildNumber
-    }
-  }
-}`;
+import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import { Button, Input, message, Modal, PageHeader, Space, Table, Tag } from "antd";
+import { useQuery, gql, useLazyQuery, useMutation } from "@apollo/client";
+import { QueryType, QueryTypeGroupsArgs, MutationTypeCreateFromTokenArgs, MutationType } from '../../../generated/graphql'
+import { onError } from "@apollo/client/link/error";
+import { GET_GROUPS_DETAILED } from "../../../generated/queries";
+import { HANDLE_MASTER } from "../../../generated/mutations";
+import { ClosedTag } from "../../comps/DataTags";
 
 
 export const GroupsTable: React.FC = () => {
-    const { data, loading } = useQuery<QueryType, QueryTypeGroupsArgs>(GET_GROUPS)
-    console.log(data)
+    const [state, setState] = useState<{ masterDialog: boolean, token?: string, id?: string }>({ masterDialog: false });
+    const { data, loading } = useQuery<QueryType, QueryTypeGroupsArgs>(GET_GROUPS_DETAILED)
+    const history = useHistory()
+
+    const [handler, masterData] = useMutation<MutationType, MutationTypeCreateFromTokenArgs>(HANDLE_MASTER, {
+        onCompleted: (dat) => {
+            if (dat.createFromToken === 0)
+                message.error("Error")
+            else {
+                message.success("Success")
+                history.push(`/panel/admin/group/${dat.createFromToken}`)
+            }
+        },
+        onError: () => {
+            message.error("Error")
+        }
+    })
+
+    const handleMaster = () => {
+        if (!state.token || !state.id || (state.token && state.token.length < 10) || (state.id && state.id.length < 1))
+            message.warn("Enter values")
+        else {
+            handler({
+                variables: { token: state.token, groupName: state.id },
+            })
+            setState({ masterDialog: false })
+        }
+    }
+
     return <React.Fragment>
     <PageHeader
       ghost={true}
       title="Groups"
       //subTitle={`Всего человек: ${state.pagination.showTotal}`}
-      extra={<Link to="/panel/admin/group/add">Add Group</Link>}>
+            extra={[
+                <Button onClick={() => setState({ masterDialog: true })}>Add Master</Button>,
+                <Link to="/panel/admin/group/add">Add Group</Link>
+            ]}>
             <Table rowKey="id" dataSource={data?.groups?.nodes ?? new Array()} //onChange={(pagination, filters, sorter) => {
             //setState({...state, sorter, pagination})}} 
             loading={loading} 
@@ -47,7 +68,31 @@ export const GroupsTable: React.FC = () => {
       )}
     />
             </Table>
-    </PageHeader>
+        </PageHeader>
+
+        <Modal
+            visible={state.masterDialog}
+            title="Master"
+            onOk={() => handleMaster()}
+            onCancel={() => {
+                setState({masterDialog: false})
+            }}
+            footer={[
+                <Button key="back" onClick={() => {
+                    setState({ masterDialog: false })
+                }}>
+                    Return
+            </Button>,
+                <Button key="submit" type="primary" loading={loading} onClick={() => handleMaster()}>
+                    Submit
+            </Button>,
+            ]}
+        >
+            <p>Group name or id:</p>
+            <Input onChange={(e) => setState({ ...state, id: e.target.value })} />
+            <p>Token:</p>
+            <Input onChange={(e) => setState({ ...state, token: e.target.value })} />
+        </Modal>
     </React.Fragment>
 
 }
