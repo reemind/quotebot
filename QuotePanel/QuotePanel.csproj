@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="5.4.2" />
+    <PackageReference Include="Flurl" Version="3.0.0" />
+    <PackageReference Include="Flurl.Http" Version="3.0.0" />
     <PackageReference Include="HotChocolate" Version="10.5.3" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="10.5.3" />
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="10.5.3" />
@@ -21,6 +23,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0" />
+    <PackageReference Include="QRCoder" Version="1.4.1" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
     <PackageReference Include="VkNet" Version="1.56.0" />
   </ItemGroup>

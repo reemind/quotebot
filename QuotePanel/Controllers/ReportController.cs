@@ -9,17 +9,19 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace QuotePanel.Controllers
 {
-    [Route("/provider/report")]
-    public class ReportController : Controller
+    [Route("/provider/")]
+    public class PanelController : Controller
     {
         DataContext context;
         Group group;
         UserRole role;
 
-        public ReportController(DataContext context, IHttpContextAccessor accessor)
+        public PanelController(DataContext context, IHttpContextAccessor accessor)
         {
             var httpContext = accessor.HttpContext;
 
@@ -40,9 +42,9 @@ namespace QuotePanel.Controllers
                 group = context.Groups.SingleOrDefault(t => t.Id == int.Parse(claim.Value));
         }
 
-        [Route("{id}")]
+        [Route("report/{id}")]
         [Authorize(Policy = "GroupModer")]
-        public IActionResult Index([FromRoute]int id)
+        public IActionResult Report([FromRoute]int id)
         {
             var report = context.GetReport(group, id);
 

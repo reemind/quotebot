@@ -18,8 +18,8 @@ const UsersTable : FC<UsersTableProps> = ({data, loading, role, all, search}) =>
                 //setState({...state, sorter, pagination})}} 
                 rowKey="id"
                 loading={loading}
-                pagination={{ showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users` }}>
-                <Table.Column key="name" title="Name" filteredValue={[search ?? ""]} onFilter={(value, record) =>
+        pagination={{ showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users` }}>
+        <Table.Column key="name" title="Name" filterMultiple filteredValue={[search ?? ""]} onFilter={(value, record) =>
                     record.name.indexOf(value) !== -1 ||
                     record.room.toString().startsWith(value) ||
                     (all && record.buildNumber.startsWith(value))
@@ -27,7 +27,7 @@ const UsersTable : FC<UsersTableProps> = ({data, loading, role, all, search}) =>
                 <Table.Column key="room" title="Room" dataIndex="room" sorter={(a: any, b: any) => a.room - b.room} />
                 {all && <Table.Column key="buildNumber" title="House" dataIndex="buildNumber" sorter={(a: any, b: any) => a.name.localeCompare(b.name)} />}
                 {all && <Table.Column key="group" title="Group" responsive={['md']} dataIndex="group" sorter={(a: any, b: any) => a.name.localeCompare(b.name)} render={(value) => <Link to={`/panel/admin/group/${value.id}`}>{value.name}</Link>} />}
-                {!all && <Table.Column key="role" title="Role" filteredValue={(role!==-1)?[role?.toString()]:null} dataIndex="role" filterMultiple={true} render={
+                {!all && <Table.Column key="role" title="Role" filteredValue={(role!==-1)?[role]:null} dataIndex="role" filterMultiple render={
                     role => (<RoleTag role={role} />)
                 } onFilter={
                     (value, record: any) => record.role === value

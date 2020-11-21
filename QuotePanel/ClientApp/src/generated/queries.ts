@@ -132,6 +132,7 @@ query GetGroupInfo($id : Int, $forAdmin: Boolean, $newGroup: Boolean) {
     withFilter
     filterPattern
     buildNumber
+    withQrCode
   }
 }
 `;
@@ -269,5 +270,10 @@ query GetReport($id: Int!) {
         }
         totalCount
     }
+}`;
+
+export const GET_REPORT_CODE = gql`
+query GetReportCode($id: Int!) {
+    reportCode(id: $id)
 }
 `;

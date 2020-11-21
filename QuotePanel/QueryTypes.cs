@@ -334,7 +334,8 @@ namespace QuotePanel.QueryTypes
                 WithFilter = group.Configuration.WithFilter,
                 Name = group.Name,
                 BuildNumber = group.BuildNumber,
-                FilterPattern = group.Configuration.FilterPattern
+                FilterPattern = group.Configuration.FilterPattern,
+                WithQrCode = group.Configuration.WithQrCode
             };
         }
 
@@ -361,6 +362,17 @@ namespace QuotePanel.QueryTypes
                 return null;
 
             return context.GetReportItems(report).Select(t => t.ToReportItemType());
+        }
+
+        [Authorize(Policy = "GroupModer")]
+        public string GetReportCode(int id)
+        {
+            var report = context.GetReport(group, id);
+
+            if (report == null)
+                return null;
+
+            return Methods.EncryptCodeString(id);
         }
     }
 
@@ -444,6 +456,7 @@ namespace QuotePanel.QueryTypes
         public string Secret { get; set; }
         public bool? Keyboard { get; set; }
         public bool? Enabled { get; set; }
+        public bool? WithQrCode { get; set; }
         public bool? WithFilter { get; set; }
         public string FilterPattern { get; set; }
         public string Name { get; set; }

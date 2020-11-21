@@ -1,22 +1,26 @@
 ﻿import React, { ReactText, useState } from "react";
 import { Redirect, Link, RouteComponentProps, withRouter } from "react-router-dom";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Button, Col, message, PageHeader, Row, Space, Table, Tag, Popconfirm } from "antd";
-import { useQuery, gql, useMutation, useApolloClient } from "@apollo/client";
-import { MutationType, MutationTypeCloseReportArgs, MutationTypeEditPostInfoArgs, MutationTypeNotifyUsersArgs, QueryType, QueryTypeUserArgs } from '../../generated/graphql'
+import { LoadingOutlined, QrcodeOutlined } from "@ant-design/icons";
+import { Button, Col, message, PageHeader, Row, Space, Table, Tag, Popconfirm, Modal, Dropdown, Menu } from "antd";
+import { useQuery, gql, useMutation, useApolloClient, useLazyQuery } from "@apollo/client";
+import { MutationType, MutationTypeCloseReportArgs, QueryType, QueryTypeUserArgs, QueryTypeReportCodeArgs, MutationTypeSendQrCodeArgs } from '../../generated/graphql'
 import './User.sass'
 import { SwitchVerification } from "./Quote";
 import { ClosedTag, OutTag, RepostTag, VerifiedTag } from "../comps/DataTags";
-import { GET_POST, GET_REPORT } from "../../generated/queries";
-import { CLOSE_REPORT, EDIT_POST_INFO, NOTIFY_USERS } from "../../generated/mutations";
+import { GET_POST, GET_REPORT, GET_REPORT_CODE } from "../../generated/queries";
+import { CLOSE_REPORT, EDIT_POST_INFO, NOTIFY_USERS, SEND_QR_CODE } from "../../generated/mutations";
 
 
-const successMes = () => {
-    message.success('Success');
+const key = "Report"
+
+const mesloading = () => {
+    message.loading({ key, content: "Loading..." })
 };
-
-const errorMes = () => {
-    message.error('Error');
+const mesError = () => {
+    message.error({ key, content: "Error", duration: 2 })
+};
+const mesSuccess = () => {
+    message.success({ key, content: "Success", duration: 2 })
 };
 
 const isEmpty = function (str) {
@@ -33,9 +37,9 @@ interface PostProps extends RouteComponentProps<RouterProps> {
 
 export const Report: React.FC<PostProps> = ({ match }) => {
     const id: number = parseInt(match.params.id)
-    const [state, setState] = useState<{ max: number, drawer: boolean, name: string, selected: ReactText[] }>({
+    const [state, setState] = useState<{ max: number, QrVisible: boolean, name: string, selected: ReactText[] }>({
         max: 0,
-        drawer: false,
+        QrVisible: false,
         name: "",
         selected: []
     })
@@ -47,15 +51,41 @@ export const Report: React.FC<PostProps> = ({ match }) => {
         }
     })
 
-    const [closeReport, mutData] = useMutation<MutationType, MutationTypeCloseReportArgs>(CLOSE_REPORT, {
+    const [closeReport] = useMutation<MutationType, MutationTypeCloseReportArgs>(CLOSE_REPORT, {
         onCompleted: (dat) => {
             if (dat.closeReport)
-                successMes()
+                mesSuccess()
             else
-                errorMes()
+                mesError()
             refetch()
         },
-        onError: () => errorMes()
+        onError: () => mesError()
+    })
+
+    const [sendCodes] = useMutation<MutationType, MutationTypeSendQrCodeArgs>(SEND_QR_CODE, {
+        onCompleted: (dat) => {
+            if (dat.sendQrCode)
+                mesSuccess()
+            else
+                mesError()
+        },
+        onError: () => mesError()
+    })
+
+    const [getLink] = useLazyQuery<QueryType, QueryTypeReportCodeArgs>(GET_REPORT_CODE, {
+        onCompleted: (dat) => {
+            if (dat.reportCode) {
+                const link = "https://vds.nexagon.ru/qrreader/" + dat.reportCode;
+                message.destroy(key)
+                Modal.info({
+                    title: "Link",
+                    content: (<a href={link}>{link}</a>)
+                })
+            }    
+            else
+                mesError()
+        },
+        onError: () => mesError()
     })
 
     if (!id || (data && !data?.report))
@@ -70,7 +100,28 @@ export const Report: React.FC<PostProps> = ({ match }) => {
                 onBack={() => window.history.back()}
                 extra={[
                     ((data.reportItems?.totalCount ?? 1) >= (data.report?.max ?? 0)) && <Tag key="tag" color="blue">Full</Tag>,
-                    data?.report?.closed && <ClosedTag closed />,
+                    data?.report?.closed ?
+                        <ClosedTag closed /> :
+                        <Dropdown
+                            visible={state.QrVisible} onVisibleChange={(vis) => setState({ ...state, QrVisible: vis})}
+                            overlay={(
+                                <Menu onClick={(e) => {
+                                    switch (e.key) {
+                                        case "getLink":
+                                            getLink({ variables: { id } });
+                                            mesloading()
+                                            break;
+                                        case "sendCodes":
+                                            sendCodes({ variables: { id } })
+                                            mesloading()
+                                            break;
+                                    }
+                                }}>
+                                    <Menu.Item key="getLink">Get link</Menu.Item>
+                                    <Menu.Item key="sendCodes">Send Qr-codes</Menu.Item>
+                                </Menu>
+                            )}><Button onClick={() => setState({ ...state, QrVisible: !state.QrVisible })}><QrcodeOutlined /></Button>
+                        </Dropdown>,
                     (data?.report?.closed ?
                         <Button onClick={() => {
                             fetch("/provider/report/" + data?.report?.id, {
@@ -91,12 +142,12 @@ export const Report: React.FC<PostProps> = ({ match }) => {
                                 });
                         }}>Make report</Button> :
                         <Popconfirm key="close" title="Do you sure?" placement="bottomRight" onConfirm={() => {
-                        closeReport({ variables: { id } })
-                    }}>
-                        <Button danger>
-                            Close
+                            closeReport({ variables: { id } })
+                        }}>
+                            <Button danger>
+                                Close
                         </Button>
-                    </Popconfirm>),
+                        </Popconfirm>),
                 ]}
             >
                 <p>Max: {data?.report?.max}</p>

@@ -6,29 +6,62 @@ import { Auth } from './components/Auth';
 import { Home } from './components/Home';
 import { gql, useQuery } from '@apollo/client';
 import { QueryType } from './generated/graphql';
-import { message } from 'antd';
+import { message, Modal } from 'antd';
 import { GET_PROFILE } from './generated/queries';
+import QrReaderForm from './components/QrReader';
+import * as serviceWorker from "./serviceWorkerRegistration";
+
 //import 'antd/dist/antd.css';
 
-
+interface AppState {
+    code: string,
+    redirectUri: string,
+    auth: boolean,
+    tryAutoAuth: boolean,
+    waitingWorker: ServiceWorker | null
+}
 
 
 const App: React.FC = (props) => {
     const history = useHistory()
 
-    const [state, setState] = useState<{ code: string, redirectUri: string, auth: boolean, tryAutoAuth: boolean, theme: string }>({
+    const [state, setState] = useState<AppState>({
         code: "",
         redirectUri: "",
         auth: false,
         tryAutoAuth: false,
-        theme: localStorage.getItem("theme") ?? "light"
+        waitingWorker: null
     })
 
-    const toggleTheme = () => {
-        setState({ ...state, theme: state.theme === "dark" ? "light" : "dark" })
-        localStorage.setItem("theme", state.theme)
-        return state.theme
-    }
+    //useEffect(() => {
+    //    serviceWorker.register({
+    //        onUpdate: registration => {
+    //            Modal.info({
+    //                content: "New version available!  Ready to update?",
+    //                title: "Update",
+    //                onOk: () => {
+    //                    if (registration && registration.waiting) {
+    //                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    //                    }
+    //                    window.location.reload();
+    //                }
+    //            })  
+    //        }
+    //    });
+    //}, [])
+
+    useEffect(() => {
+        serviceWorker.register({
+            onUpdate: registration => {
+                if (window.confirm("New version available!  Ready to update?")){
+                        if (registration && registration.waiting) {
+                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                        window.location.reload();
+                    }
+            }
+        });
+    }, [])
 
     useQuery<QueryType>(GET_PROFILE, {
         onCompleted: (value) => {
@@ -51,12 +84,16 @@ const App: React.FC = (props) => {
                     history.push('/home')
                 }
             }} />} />
-            <Route path="/panel/" component={() => <Panel onToggleTheme={toggleTheme} theme={state.theme} />} />
+            <Route path="/panel/" component={() => <Panel/>} />
             <Route exact path="/logout" component={() => {
                 setState({ ...state, auth: false })
                 localStorage["token"] = ""
                 return <Redirect from="/logout" exact to="/home" />
             }} />
+
+            <Route path="/qrreader/:reportId" component={(props) => <QrReaderForm {...props} />} />
+
+            <Redirect to="/home" />
         </Switch>
     )
 }

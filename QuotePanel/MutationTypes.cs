@@ -16,6 +16,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using VkNet;
 using VkNet.Model;
+using System.Text;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.IO;
+using Flurl;
+using Flurl.Http;
+using System.Web;
 
 namespace QuotePanel.QueryTypes
 {
@@ -279,11 +286,15 @@ namespace QuotePanel.QueryTypes
             if (inputGroup.Enabled.HasValue)
                 group.Configuration.Enabled = inputGroup.Enabled.Value;
 
+            if (inputGroup.WithQrCode.HasValue)
+                group.Configuration.WithQrCode = inputGroup.WithQrCode.Value;
+
             if (inputGroup.WithFilter.HasValue)
                 group.Configuration.WithFilter = inputGroup.WithFilter.Value;
 
             if (inputGroup.FilterPattern != null)
                 group.Configuration.FilterPattern = inputGroup.FilterPattern;
+
 
             group.Configuration = group.Configuration;
 
@@ -342,7 +353,7 @@ namespace QuotePanel.QueryTypes
                     var sendResults = api.Messages.SendToUserIds(prms);
 
                     foreach (var res in sendResults)
-                        if(!res.MessageId.HasValue)
+                        if (!res.MessageId.HasValue)
                             quotesForReports.RemoveAll(t => res.PeerId == t.User.Id);
                 }
                 catch
@@ -438,6 +449,7 @@ namespace QuotePanel.QueryTypes
             return context.CreateReport(group, post)?.Id ?? 0;
         }
 
+        [Authorize(Policy = "GroupModer")]
         public bool CloseReport(int id, bool? forAdmin)
         {
             var report = context.Reports.Include(t => t.FromPost).SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == group) && t.Id == id);
@@ -461,6 +473,93 @@ namespace QuotePanel.QueryTypes
 
             post.Deleted = true;
             context.SaveChanges();
+
+            return true;
+        }
+
+        public UserType ConfirmQrCode(string eReport, string eReportItem)
+        {
+
+            var reportId =  Methods.DecryptCodeString(eReport);
+            var reportItemId = Methods.DecryptCodeString(eReportItem);
+
+            if (reportId == 0 || reportItemId == 0)
+                return null;
+
+            var reportItem = context.ReportItems
+                .Include(t => t.User)
+                .FirstOrDefault(t => t.Report.Id == reportId && !t.Report.Closed && t.Id == reportItemId);
+
+            if (reportItem == null)
+                return null;
+
+            reportItem.Verified = true;
+            context.SaveChanges();
+
+            return reportItem.User.ToUserType(UserRole.User);
+        }
+
+        [Authorize(Policy = "GroupModer")]
+        public async Task<bool> SendQrCode(int id, bool? forAdmin)
+        {
+            if (!group.Configuration.WithQrCode)
+                return false;
+
+            var report = context.Reports.SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == group) && t.Id == id);
+
+            if (report == null)
+                return false;
+
+            var groups = context.GetReportItems(report)
+                .Include(t => t.User.House)
+                .AsEnumerable()
+                .GroupBy(t => t.User.House);
+
+            var client = new HttpClient();
+            var coder = new QRCoder.PngByteQRCode();
+            QRCoder.QRCodeGenerator qrGenerator = new QRCoder.QRCodeGenerator();
+
+            foreach (var gr in groups)
+            {
+                var api = new VkApi();
+                api.Authorize(new ApiAuthParams() { AccessToken = gr.Key.Token });
+
+                if (!api.IsAuthorized)
+                    return false;
+
+                foreach (var item in gr)
+                    try
+                    {
+                        //var data = Convert.ToBase64String()
+
+                        coder.SetQRCodeData(
+                            qrGenerator.CreateQrCode(Methods.EncryptCodeString(item.Id), QRCoder.QRCodeGenerator.ECCLevel.Q));
+
+                        byte[] picture = coder.GetGraphic(40);
+                        File.WriteAllBytes("img.png", picture);
+
+                        var uploadServer = await api.Photo.GetMessagesUploadServerAsync(item.User.VkId);
+
+                        var response = await (await uploadServer.UploadUrl.PostMultipartAsync(t =>
+                        {
+                            t.AddFile("photo", new MemoryStream(picture), "qrcode.png", "img/png");
+                        })).GetStringAsync();
+
+                        var photo = api.Photo.SaveMessagesPhoto(response);
+
+                        api.Messages.Send(new VkNet.Model.RequestParams.MessagesSendParams
+                        {
+                            RandomId = (int)DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                            PeerId = item.User.VkId,
+                            Message = "Предъяви при входе",
+                            Attachments = photo
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+            }
 
             return true;
         }

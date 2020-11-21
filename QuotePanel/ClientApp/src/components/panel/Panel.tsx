@@ -56,7 +56,7 @@ const ContentItems: ItemType[] = [
 ]
 
 
-const Panel: React.FC<{ onToggleTheme: () => string, theme: string }> = ({ onToggleTheme, theme }) => {
+const Panel: React.FC = () => {
     const [state, setState] = useState<{ collapsed: boolean }>({
         collapsed: false
     })
@@ -100,14 +100,6 @@ const Panel: React.FC<{ onToggleTheme: () => string, theme: string }> = ({ onTog
 
                                     <h3>QuoteBot Panel</h3>
                                 </Space>
-                            </Col>
-                            <Col flex="60px" className="row-gutter">
-                                <CheckSwitch
-                                    checkedChildren="Day"
-                                    unCheckedChildren="Night"
-                                    defaultChecked={theme=="light"}
-                                    onChange={() => onToggleTheme()}                                    
-                                />
                             </Col>
                             <Col flex="60px" className="row-gutter">
                                 <Button shape="circle" onClick={() => history.push("/panel/settings")}><SettingOutlined /></Button>

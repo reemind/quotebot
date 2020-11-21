@@ -12,7 +12,7 @@ export const Reports: React.FC = () => {
     return <React.Fragment>
         <PageHeader
             ghost={true}
-            title="Posts"
+            title="Reports"
             //subTitle={`Всего человек: ${state.pagination.showTotal}`}
             extra={[
 
@@ -21,13 +21,11 @@ export const Reports: React.FC = () => {
                 loading={loading}
                 pagination={{ showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} posts` }}>
                 <Table.Column key="id" title="Id" dataIndex="id" sorter={(a: any, b: any) => a.id - b.id} />
-                <Table.Column key="name" title="Name" dataIndex="name" sorter={(a: any, b: any) => a.text.localeCompare(b.text)}/>
+                <Table.Column key="name" title="Name" dataIndex="name" sorter={(a: any, b: any) => a.text.localeCompare(b.text)}
+                    render={(item, record) => (<p><ClosedTag closed={record.closed} /> {record.name}</p>)}/>
                 <Table.Column key="max" title="Max" dataIndex="max" sorter={(a: any, b: any) => a.max - b.max} />
-                <Table.Column key="state" dataIndex="closed" render={value =>
-                    <ClosedTag closed={value} />
-                } />
                 <Table.Column
-                    width={36}
+                    width={42}
                     title="Action"
                     key="action"
                     render={(record) => (

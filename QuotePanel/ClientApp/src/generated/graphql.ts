@@ -31,6 +31,7 @@ export type QueryType = {
   qoutesByPost?: Maybe<QuoteTypeConnection>;
   qoutesByUser?: Maybe<QuoteTypeConnection>;
   report?: Maybe<ReportType>;
+  reportCode?: Maybe<Scalars['String']>;
   reportItems?: Maybe<ReportItemTypeConnection>;
   reports?: Maybe<ReportTypeConnection>;
   stat?: Maybe<StatType>;
@@ -117,6 +118,11 @@ export type QueryTypeReportArgs = {
 };
 
 
+export type QueryTypeReportCodeArgs = {
+  id: Scalars['Int'];
+};
+
+
 export type QueryTypeReportItemsArgs = {
   after?: Maybe<Scalars['String']>;
   before?: Maybe<Scalars['String']>;
@@ -174,6 +180,7 @@ export type MutationType = {
   __typename?: 'MutationType';
   addUsersToPost: Scalars['Int'];
   closeReport: Scalars['Boolean'];
+  confirmQrCode?: Maybe<UserType>;
   createFromToken: Scalars['Int'];
   createReport: Scalars['Int'];
   deletePost: Scalars['Boolean'];
@@ -181,6 +188,7 @@ export type MutationType = {
   editUserInfo: Scalars['Boolean'];
   notifyUsers: Scalars['Int'];
   removeRole: Scalars['Boolean'];
+  sendQrCode: Scalars['Boolean'];
   sendUsers: Scalars['Boolean'];
   switchQuoteVal: Scalars['Boolean'];
   switchVerificationVal: Scalars['Boolean'];
@@ -197,6 +205,12 @@ export type MutationTypeAddUsersToPostArgs = {
 export type MutationTypeCloseReportArgs = {
   forAdmin?: Maybe<Scalars['Boolean']>;
   id: Scalars['Int'];
+};
+
+
+export type MutationTypeConfirmQrCodeArgs = {
+  eReport?: Maybe<Scalars['String']>;
+  eReportItem?: Maybe<Scalars['String']>;
 };
 
 
@@ -241,6 +255,12 @@ export type MutationTypeNotifyUsersArgs = {
 
 
 export type MutationTypeRemoveRoleArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationTypeSendQrCodeArgs = {
+  forAdmin?: Maybe<Scalars['Boolean']>;
   id: Scalars['Int'];
 };
 
@@ -336,6 +356,7 @@ export type GroupInfoType = {
   secret?: Maybe<Scalars['String']>;
   token?: Maybe<Scalars['String']>;
   withFilter?: Maybe<Scalars['Boolean']>;
+  withQrCode?: Maybe<Scalars['Boolean']>;
 };
 
 export type UserTypeFilter = {
@@ -599,6 +620,8 @@ export type GroupInfoTypeFilter = {
   token_starts_with?: Maybe<Scalars['String']>;
   withFilter?: Maybe<Scalars['Boolean']>;
   withFilter_not?: Maybe<Scalars['Boolean']>;
+  withQrCode?: Maybe<Scalars['Boolean']>;
+  withQrCode_not?: Maybe<Scalars['Boolean']>;
 };
 
 export type GroupInfoTypeSort = {
@@ -613,6 +636,7 @@ export type GroupInfoTypeSort = {
   secret?: Maybe<SortOperationKind>;
   token?: Maybe<SortOperationKind>;
   withFilter?: Maybe<SortOperationKind>;
+  withQrCode?: Maybe<SortOperationKind>;
 };
 
 export type ReportTypeFilter = {
@@ -861,6 +885,7 @@ export type GroupInfoTypeInput = {
   secret?: Maybe<Scalars['String']>;
   token?: Maybe<Scalars['String']>;
   withFilter?: Maybe<Scalars['Boolean']>;
+  withQrCode?: Maybe<Scalars['Boolean']>;
 };
 
 export type GroupResponseType = {
@@ -901,6 +926,7 @@ export type Config = {
   filterPattern?: Maybe<Scalars['String']>;
   keyboard: Scalars['Boolean'];
   withFilter: Scalars['Boolean'];
+  withQrCode: Scalars['Boolean'];
 };
 
 export type Report = {

@@ -63,7 +63,8 @@ const Settings: React.FC<GroupProps> = ({ match, history, all, newGroup }) => {
                 title={data?.groupInfo?.name}
                 onBack={all ? (() => window.history.back()) : undefined}
                 subTitle={`ID: ${data?.groupInfo?.groupId}`}
-                extra={<a key="vkLink" target="_blank" rel="noopener noreferrer" href={"https://vk.com/public" + data?.groupInfo?.groupId}>Page</a>} />
+            //extra={<a key="vkLink" target="_blank" rel="noopener noreferrer" href={"https://vk.com/public" + data?.groupInfo?.groupId}>Page</a>} 
+            />
             <Row style={{ minHeight: "100%" }} align="middle" justify="center">
                 <Col span={8}>
                     <Form onFinish={values => {
@@ -77,6 +78,7 @@ const Settings: React.FC<GroupProps> = ({ match, history, all, newGroup }) => {
                                     secret: values.secret ? values.secret : "",
                                     keyboard: values.keyboard,
                                     withFilter: values.withFilter,
+                                    withQrCode: values.withQrCode,
                                     buildNumber: values.buildNumber,
                                     filterPattern: values.filterPattern,
                                     groupId: values.groupId ? parseInt(values.groupId) : undefined
@@ -110,6 +112,9 @@ const Settings: React.FC<GroupProps> = ({ match, history, all, newGroup }) => {
                         </Form.Item>
                         <Form.Item name="keyboard" label="Enable Keyboard" valuePropName="checked">
                             <Switch defaultChecked={data?.groupInfo?.keyboard ?? false} />
+                        </Form.Item>
+                        <Form.Item name="withQrCode" label="Enable Qr-Codes" valuePropName="checked">
+                            <Switch defaultChecked={data?.groupInfo?.withQrCode ?? false} />
                         </Form.Item>
                         <Form.Item name="withFilter" label="Enable Filter" valuePropName="checked">
                             <Switch onChange={(val) => setState({ ...state, withFilter: val })} defaultChecked={data?.groupInfo?.withFilter ?? false} />

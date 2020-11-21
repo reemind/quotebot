@@ -52,3 +52,18 @@ export const DELETE_POST = gql`
 mutation DeletePost($id: Int!, $forAdmin: Boolean) {
     deletePost(id: $id, forAdmin: $forAdmin)
 }`;
+
+export const CONFIRM_QR_CODE = gql`
+mutation ConfirmQrCode($eReport: String, $eReportItem: String) {
+    confirmQrCode(eReport: $eReport, eReportItem: $eReportItem){
+        id
+        name
+        room
+    }
+}`;
+
+export const SEND_QR_CODE = gql`
+mutation SendQrCode($id: Int!) {
+    sendQrCode(id: $id)
+}`;
+

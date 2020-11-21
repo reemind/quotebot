@@ -8,11 +8,12 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 
+import { BackgroundSyncPlugin } from 'workbox-background-sync';
 import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { StaleWhileRevalidate, NetworkOnly } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -51,6 +52,18 @@ registerRoute(
     return true;
   },
   createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')
+);
+
+const bgSyncPlugin = new BackgroundSyncPlugin('myQueueName', {
+    maxRetentionTime: 24 * 60 // Retry for max of 24 Hours (specified in minutes)
+});
+
+registerRoute(
+    ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.js'),
+    new NetworkOnly({
+        plugins: [bgSyncPlugin]
+    }),
+    'GET'
 );
 
 // An example runtime caching route for requests that aren't handled by the
