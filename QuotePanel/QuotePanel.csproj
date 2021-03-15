@@ -40,6 +40,9 @@
     <None Remove="ClientApp\src\components\panel\Report.tsx" />
     <None Remove="ClientApp\src\components\panel\Settings.tsx~RF20fd09a0.TMP" />
     <None Remove="ClientApp\src\components\Reports.tsx" />
+    <None Remove="ClientApp\src\components\userpanel\panel.tsx" />
+    <None Remove="ClientApp\src\components\userpanel\Queries.tsx" />
+    <None Remove="ClientApp\src\components\userpanel\Reports.tsx" />
     <None Remove="ClientApp\src\generated\mutations.tsx" />
     <None Remove="ClientApp\src\generated\queries.tsx" />
   </ItemGroup>
@@ -54,6 +57,9 @@
     <TypeScriptCompile Include="ClientApp\src\components\Home.tsx" />
     <TypeScriptCompile Include="ClientApp\src\components\panel\Report.tsx" />
     <TypeScriptCompile Include="ClientApp\src\components\panel\Reports.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\userpanel\Panel.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\userpanel\Queries.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\components\userpanel\Reports.tsx" />
     <TypeScriptCompile Include="ClientApp\src\generated\mutations.tsx" />
     <TypeScriptCompile Include="ClientApp\src\generated\queries.tsx" />
   </ItemGroup>

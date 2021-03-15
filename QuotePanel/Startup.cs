@@ -18,6 +18,7 @@ using HotChocolate.Types;
 using Serilog;
 using Microsoft.AspNetCore.HttpOverrides;
 using OfficeOpenXml;
+using System;
 
 namespace QuotePanel
 {
@@ -103,18 +104,21 @@ namespace QuotePanel
                     .AddType<QuoteType>()
                     .AddType<ReportType>()
                     .AddType<ReportItemType>()
+                    .AddType<UserInfoType>()
                     .AddServices(sp)
                     .AddAuthorizeDirectiveType().Create());
 
             services.AddControllersWithViews();
             services.AddCors();
 
+            Methods.Manager.SetData(Configuration.GetSection("AES"));
+
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
-                configuration.RootPath = "ClientApp/build";
+                configuration.RootPath = "./ClientApp/build/";
             });
         }
 
@@ -160,7 +164,7 @@ namespace QuotePanel
 
             app.UseSpa(spa =>
             {
-                spa.Options.SourcePath = "ClientApp/build";
+                spa.Options.SourcePath = "./ClientApp/build/";
 
                 if (env.IsDevelopment())
                 {

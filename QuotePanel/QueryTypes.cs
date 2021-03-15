@@ -20,30 +20,16 @@ namespace QuotePanel.QueryTypes
 {
     public class QueryType
     {
-        IHttpContextAccessor httpContext;
+        HttpContext httpContext;
         DataContext context;
-        Group group;
-        UserRole role;
+        GroupRole role;
 
         public QueryType([Service] IHttpContextAccessor httpContext, [Service] DataContext context)
         {
             this.context = context;
-            this.httpContext = httpContext;
+            this.httpContext = httpContext.HttpContext;
 
-            if (httpContext.HttpContext.User.HasClaim(t => t.Type == "Role"))
-                role = httpContext.HttpContext.User.Claims.First(t => t.Type == "Role").Value switch
-                {
-                    "User" => UserRole.User,
-                    "GroupModer" => UserRole.GroupModer,
-                    "GroupAdmin" => UserRole.GroupAdmin,
-                    "Moder" => UserRole.Moder,
-                    _ => UserRole.Admin
-                };
-
-            var claim = httpContext.HttpContext.User.Claims.FirstOrDefault(t => t.Type == "GroupId");
-
-            if (claim is Claim)
-                group = context.Groups.SingleOrDefault(t => t.Id == int.Parse(claim.Value));
+            role = context.GetDataFromClaims(this.httpContext.User);
         }
 
         [Authorize(Policy = "GroupModer")]
@@ -51,14 +37,14 @@ namespace QuotePanel.QueryTypes
         {
             if (IsMainModer(forAdmin) && groupId.HasValue)
             {
-                group = context.Groups.Find(groupId.Value);
+                role.Group = context.Groups.Find(groupId.Value);
 
                 if (groupId == null)
                     return null;
             }
 
             var quotes = context.Quotes.Include(t => t.Post.Group)
-                                    .Where(t => t.Post.Group == group)
+                                    .Where(t => t.Post.Group == role.Group)
                                     .GroupBy(t => t.Time.Date)
                                     .OrderBy(t => t.Key)
                                     .Select(t => new StatQuoteType
@@ -67,7 +53,7 @@ namespace QuotePanel.QueryTypes
                                         Count = t.Count()
                                     }).ToList();
 
-            var floor = context.GetUsers(group)
+            var floor = context.GetUsers(role.Group)
                                     .GroupBy(t => t.Room / 100)
                                     .OrderBy(t => t.Key)
                                     .Select((t) => new StatFloorType { Floor = t.Key, Count = t.Count() })
@@ -83,20 +69,13 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public UserType GetProfile()
         {
-            var groupId = int.Parse(httpContext.HttpContext.User.Claims.First(t => t.Type == "GroupId").Value);
-            var group = context.Groups.Single(t => t.Id == groupId);
-            var userId = int.Parse(httpContext.HttpContext.User.Claims.First(t => t.Type == "Id").Value);
-
-            var user = context.Users.Include(t => t.House)
-                .Single(t => t.Id == userId);
-
-            return user.ToUserType(context.GetGroupRole(group, user).Role);
+            return role.User.ToUserType(role.Role);
         }
 
         [Authorize(Policy = "GroupModer")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<UserType> GetUsers(bool? forAdmin)
         {
             if (IsMainModer(forAdmin))
@@ -108,7 +87,7 @@ namespace QuotePanel.QueryTypes
             }
             else
             {
-                var roles = context.GetGroupRoles(group);
+                var roles = context.GetGroupRoles(role.Group);
 
                 return roles.Include(t => t.User.House)
                             .Select(t => t.User.ToUserType(t.Role, t.User.Id, null));
@@ -118,11 +97,12 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "Moder")]
         public IQueryable<RoleType> GetUserRoles(int id)
             => context.GroupsRoles.Include(t => t.Group).Where(t => t.User.Id == id).Select(t =>
-            new RoleType {
-            Id = t.Id,
-            BuildNumber = t.Group.BuildNumber,
-            Name = t.Group.Name,
-            Role = (int)t.Role
+            new RoleType
+            {
+                Id = t.Id,
+                BuildNumber = t.Group.BuildNumber,
+                Name = t.Group.Name,
+                Role = (int)t.Role
             });
 
         bool IsMainModer(bool? forAdmin)
@@ -130,7 +110,7 @@ namespace QuotePanel.QueryTypes
             if (!(forAdmin ?? false))
                 return false;
 
-            return (role == UserRole.Moder || role == UserRole.Admin);
+            return (role.Role == UserRole.Moder || role.Role == UserRole.Admin);
         }
 
         bool IsMainAdmin(bool? forAdmin)
@@ -138,7 +118,7 @@ namespace QuotePanel.QueryTypes
             if (!(forAdmin ?? false))
                 return false;
 
-            return (role == UserRole.Admin);
+            return (role.Role == UserRole.Admin);
         }
 
         [Authorize(Policy = "GroupModer")]
@@ -149,7 +129,7 @@ namespace QuotePanel.QueryTypes
 
 
             var groupRole = context.GroupsRoles.Include(t => t.User)
-                                .FirstOrDefault(t => t.User.Id == id && t.Group == group);
+                                .FirstOrDefault(t => t.User.Id == id && t.Group == role.Group);
 
             if (groupRole is null)
                 return null;
@@ -159,25 +139,21 @@ namespace QuotePanel.QueryTypes
 
         [Authorize(Policy = "GroupModer")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<QuoteType> GetQoutes()
         {
-            var groupId = int.Parse(httpContext.HttpContext.User.Claims.First(t => t.Type == "GroupId").Value);
-
-            return context.Quotes.Where(t => t.Post.Group.Id == groupId).Select(t =>
+            return context.Quotes.Where(t => t.Post.Group == role.Group).Select(t =>
                 t.ToQuoteType(t.Post, t.User, context.GetGroupRole(t.Post.Group, t.User).Role));
         }
 
         [Authorize(Policy = "GroupModer")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<QuoteType> GetQoutesByPost(int id)
         {
-            var groupId = int.Parse(httpContext.HttpContext.User.Claims.First(t => t.Type == "GroupId").Value);
-
-            return context.Quotes.Where(t => t.Post.Group.Id == groupId && t.Post.Id == id)
+            return context.Quotes.Where(t => t.Post.Group == role.Group && t.Post.Id == id)
                 .OrderBy(t => t.Time)
                 .Select(t =>
                 t.ToQuoteType(t.Post, t.User, UserRole.User));
@@ -185,11 +161,11 @@ namespace QuotePanel.QueryTypes
 
         [Authorize(Policy = "GroupModer")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<QuoteType> GetQoutesByUser(int id, bool? forAdmin)
         {
-            return context.Quotes.Where(t => (IsMainModer(forAdmin) || t.Post.Group == group) && t.User.Id == id)
+            return context.Quotes.Where(t => (IsMainModer(forAdmin) || t.Post.Group == role.Group) && t.User.Id == id)
                 .OrderBy(t => t.Time)
                 .Select(t =>
                 t.ToQuoteType(t.Post, t.User, UserRole.User));
@@ -198,7 +174,7 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public PostType GetPost(int id)
         {
-            var post = context.GetPosts(group).Include(t => t.BindTo).SingleOrDefault(t => t.Id == id);
+            var post = context.GetPosts(role.Group).Include(t => t.BindTo).SingleOrDefault(t => t.Id == id);
 
             if (post is null)
                 return null;
@@ -215,28 +191,28 @@ namespace QuotePanel.QueryTypes
 
         [Authorize(Policy = "GroupModer")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<PostType> GetPosts()
         {
 
-            return context.GetPosts(group)
+            return context.GetPosts(role.Group)
                 .Include(t => t.BindTo)
                 .OrderByDescending(t => t.Time)
                 .Select(t => new PostType
-            {
-                Id = t.Id,
-                Text = t.Text,
-                Deleted = t.Deleted,
-                Max = t.Max,
-                IsRepost = t.BindTo != null
-            });
+                {
+                    Id = t.Id,
+                    Text = t.Text,
+                    Deleted = t.Deleted,
+                    Max = t.Max,
+                    IsRepost = t.BindTo != null
+                });
         }
 
         [Authorize(Policy = "Moder")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<GroupInfoType> GetGroups()
             => context.Groups.Select(t => new GroupInfoType
             {
@@ -302,9 +278,8 @@ namespace QuotePanel.QueryTypes
 
                 return Methods.CreateToken(new List<Claim>
                                 {
-                                    new Claim("Id", groupRole.User.Id.ToString()),
-                                    new Claim("GroupId", groupRole.Group.Id.ToString()),
                                     new Claim("Status", "Logged"),
+                                    new Claim("RoleId", groupRole.Id.ToString()),
                                     new Claim("Role", groupRole.Role.ToString())
                                 }, "Login");
             }
@@ -314,28 +289,28 @@ namespace QuotePanel.QueryTypes
         public GroupInfoType GetGroupInfo(int? id, bool? forAdmin, bool? newGroup)
         {
             if (id.HasValue && IsMainModer(forAdmin))
-                group = context.Groups.Find(id.Value);
+                role.Group = context.Groups.Find(id.Value);
 
             if (newGroup.HasValue && newGroup.Value)
                 return null;
 
-            if (group is null)
+            if (role.Group is null)
                 return null;
 
             return new GroupInfoType
             {
-                Id = group.Id,
-                Token = group.Token,
-                GroupId = group.GroupId,
-                Key = group.Key,
-                Secret = group.Secret,
-                Keyboard = group.Configuration.Keyboard,
-                Enabled = group.Configuration.Enabled,
-                WithFilter = group.Configuration.WithFilter,
-                Name = group.Name,
-                BuildNumber = group.BuildNumber,
-                FilterPattern = group.Configuration.FilterPattern,
-                WithQrCode = group.Configuration.WithQrCode
+                Id = role.Group.Id,
+                Token = role.Group.Token,
+                GroupId = role.Group.GroupId,
+                Key = role.Group.Key,
+                Secret = role.Group.Secret,
+                Keyboard = role.Group.Configuration.Keyboard,
+                Enabled = role.Group.Configuration.Enabled,
+                WithFilter = role.Group.Configuration.WithFilter,
+                Name = role.Group.Name,
+                BuildNumber = role.Group.BuildNumber,
+                FilterPattern = role.Group.Configuration.FilterPattern,
+                WithQrCode = role.Group.Configuration.WithQrCode
             };
         }
 
@@ -344,36 +319,70 @@ namespace QuotePanel.QueryTypes
         [UseFiltering]
         [UseSorting]
         public IQueryable<ReportType> GetReports()
-            => context.GetReports(group).Select(t => t.ToReportType());
+            => context.GetReports(role.Group)
+                .OrderByDescending(t => t.Id)
+                .Select(t => t.ToReportType());
 
         [Authorize(Policy = "GroupModer")]
         public ReportType GetReport(int id)
-            => context.GetReport(group, id)?.ToReportType() ?? null;
+            => context.GetReport(role.Group, id)?.ToReportType() ?? null;
 
         [Authorize(Policy = "GroupModer")]
         [UsePaging]
-        [UseFiltering]
-        [UseSorting]
+        //[UseFiltering]
+        //[UseSorting]
         public IQueryable<ReportItemType> GetReportItems(int id)
         {
-            var report = context.GetReport(group, id);
+            var report = context.GetReport(role.Group, id);
 
             if (report == null)
                 return null;
 
-            return context.GetReportItems(report).Select(t => t.ToReportItemType());
+            return context.GetReportItems(report).Select(t => t.ToReportItemType(null));
         }
 
         [Authorize(Policy = "GroupModer")]
         public string GetReportCode(int id)
         {
-            var report = context.GetReport(group, id);
+            var report = context.GetReport(role.Group, id);
 
             if (report == null)
                 return null;
 
             return Methods.EncryptCodeString(id);
         }
+
+
+        [Authorize(Policy = "Admin")]
+        public string GetLifetimeToken()
+        {
+            var expires = DateTime.Now.AddYears(10);
+            return Methods.CreateToken(new List<Claim>
+                                {
+                                    new Claim("Status", "Logged"),
+                                    new Claim("RoleId", role.Id.ToString()),
+                                    new Claim("Role", role.Role.ToString())
+                                },
+                                "Login",
+                                expires
+                                );
+        }
+
+        #region User
+
+        [Authorize(Policy = "User")]
+        public UserInfoType GetUserInfo()
+            => new UserInfoType
+            {
+                Quotes = context.GetQuotes(role.User)
+                    .Include(t => t.Post)
+                    .Select(t => t.ToQuoteType(t.Post, role.User, role.Role)).ToList(),
+                ReportItems = context.GetReportItems(role)
+                    .Include(t => t.Report.FromPost)
+                    .Select(t => t.ToReportItemType(t.Report)).ToList()
+            };
+
+        #endregion
     }
 
 
@@ -417,12 +426,20 @@ namespace QuotePanel.QueryTypes
             Closed = report.Closed
         };
 
-        public static ReportItemType ToReportItemType(this ReportItem reportItem) => new ReportItemType
+        public static ReportItemType ToReportItemType(this ReportItem reportItem, Report report) => new ReportItemType
         {
             Id = reportItem.Id,
             User = reportItem.User.ToUserType(UserRole.User),
-            Verified = reportItem.Verified
+            Verified = reportItem.Verified,
+            FromPost = report?.FromPost.ToPostType() ?? null,
+            Closed = report?.Closed ?? null
         };
+
+        public static QuoteType ChangeOut(this QuoteType quoteType, bool isOut)
+        {
+            quoteType.IsOut = isOut;
+            return quoteType;
+        }
     }
 
     public class GroupResponseType
@@ -506,6 +523,8 @@ namespace QuotePanel.QueryTypes
         public int Id { get; set; }
         public UserType User { get; set; }
         public bool Verified { get; set; }
+        public PostType FromPost { get; set; }
+        public bool? Closed { get; set; }
     }
 
     public class StatType
@@ -524,5 +543,11 @@ namespace QuotePanel.QueryTypes
     {
         public string Date { get; set; }
         public int Count { get; set; }
+    }
+
+    public class UserInfoType
+    {
+        public IEnumerable<ReportItemType> ReportItems { get; set; }
+        public IEnumerable<QuoteType> Quotes { get; set; }
     }
 }

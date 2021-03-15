@@ -1,0 +1,4 @@
+overwrite: true
+schema: "http://localhost:5000/graphql"
+generates:
+  schema.graphql:

@@ -23,6 +23,7 @@ using System.IO;
 using Flurl;
 using Flurl.Http;
 using System.Web;
+using Microsoft.Extensions.Logging;
 
 namespace QuotePanel.QueryTypes
 {
@@ -30,30 +31,18 @@ namespace QuotePanel.QueryTypes
     public class MutationType
     {
 
-        IHttpContextAccessor httpContext;
+        HttpContext httpContext;
         DataContext context;
-        Data.Group group;
-        UserRole role;
+        GroupRole role;
+        //ILogger logger;
 
         public MutationType([Service] IHttpContextAccessor httpContext, [Service] DataContext context)
         {
             this.context = context;
-            this.httpContext = httpContext;
+            this.httpContext = httpContext.HttpContext;
+            //this.logger = logger;
 
-            if (httpContext.HttpContext.User.HasClaim(t => t.Type == "Role"))
-                role = httpContext.HttpContext.User.Claims.First(t => t.Type == "Role").Value switch
-                {
-                    "User" => UserRole.User,
-                    "GroupModer" => UserRole.GroupModer,
-                    "GroupAdmin" => UserRole.GroupAdmin,
-                    "Moder" => UserRole.Moder,
-                    _ => UserRole.Admin
-                };
-
-            var claim = httpContext.HttpContext.User.Claims.FirstOrDefault(t => t.Type == "GroupId");
-
-            if (claim is Claim)
-                group = context.Groups.SingleOrDefault(t => t.Id == int.Parse(claim.Value));
+            role = context.GetDataFromClaims(this.httpContext.User);
         }
 
         bool IsMainModer(bool? forAdmin)
@@ -61,7 +50,7 @@ namespace QuotePanel.QueryTypes
             if (!(forAdmin ?? false))
                 return false;
 
-            return (role == UserRole.Moder || role == UserRole.Admin);
+            return (role.Role == UserRole.Moder || role.Role == UserRole.Admin);
         }
 
         bool IsMainAdmin(bool? forAdmin)
@@ -69,7 +58,7 @@ namespace QuotePanel.QueryTypes
             if (!(forAdmin ?? false))
                 return false;
 
-            return (role == UserRole.Admin);
+            return (role.Role == UserRole.Admin);
         }
 
         [Authorize(Policy = "GroupModer")]
@@ -82,7 +71,7 @@ namespace QuotePanel.QueryTypes
 
                 if (user is null ||
                     (string.IsNullOrWhiteSpace(newName) && group is null) ||
-                    (context.GetGroupRole(group, user)?.Role ?? UserRole.User) >= role)
+                    (context.GetGroupRole(group, user)?.Role ?? UserRole.User) >= role.Role)
                     return false;
 
                 if (!string.IsNullOrWhiteSpace(newName))
@@ -91,7 +80,7 @@ namespace QuotePanel.QueryTypes
                 if (newType.HasValue &&
                     newType.Value >= 0 &&
                     newType.Value < 5 &&
-                    newType <= (int)role)
+                    newType <= (int)role.Role)
                     context.SetRole(group, user, (UserRole)newType);
 
                 context.SaveChanges();
@@ -99,9 +88,9 @@ namespace QuotePanel.QueryTypes
             }
 
             var groupRole = context.GroupsRoles.Include(t => t.User)
-                                .FirstOrDefault(t => t.User.Id == id && t.Group == group);
+                                .FirstOrDefault(t => t.User.Id == id && t.Group == role.Group);
 
-            if (groupRole is null || groupRole.Role >= role || newType > (int)role)
+            if (groupRole is null || groupRole.Role >= role.Role || newType > (int)role.Role)
                 return false;
 
 
@@ -120,7 +109,7 @@ namespace QuotePanel.QueryTypes
         {
             var groupRole = context.GroupsRoles.Find(id);
 
-            if (groupRole is null && groupRole.Role >= role)
+            if (groupRole is null && groupRole.Role >= role.Role)
                 return false;
 
             context.Remove(groupRole);
@@ -202,7 +191,7 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public bool EditPostInfo(int id, int? newMax, string newName)
         {
-            var post = context.GetPosts(group).SingleOrDefault(t => t.Id == id);
+            var post = context.GetPosts(role.Group).SingleOrDefault(t => t.Id == id);
 
             if (post is null)
                 return false;
@@ -223,7 +212,7 @@ namespace QuotePanel.QueryTypes
         public bool SwitchQuoteVal(int id, bool? forAdmin)
         {
 
-            var quote = context.Quotes.SingleOrDefault(t => (IsMainModer(forAdmin) || t.Post.Group == group) && t.Id == id);
+            var quote = context.Quotes.SingleOrDefault(t => (IsMainModer(forAdmin) || t.Post.Group == role.Group) && t.Id == id);
 
             if (quote is null)
                 return false;
@@ -240,7 +229,7 @@ namespace QuotePanel.QueryTypes
 
             var reportItem = context.ReportItems
                 .Include(t => t.Report)
-                .SingleOrDefault(t => (IsMainModer(forAdmin) || t.Report.Group == group) && t.Id == id);
+                .SingleOrDefault(t => (IsMainModer(forAdmin) || t.Report.Group == role.Group) && t.Id == id);
 
             if (reportItem is null || reportItem.Report.Closed)
                 return false;
@@ -255,6 +244,7 @@ namespace QuotePanel.QueryTypes
         public bool UpdateGroup(GroupInfoType inputGroup, int? id, bool? newGroup, bool? forAdmin)
         {
             var nGroup = newGroup.HasValue && newGroup.Value;
+            var group = role.Group;
 
             if (!nGroup && id.HasValue && IsMainModer(forAdmin))
                 group = context.Groups.Find(id.Value);
@@ -312,13 +302,12 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public int NotifyUsers(int postId, IEnumerable<int> quotesId)
         {
-            var result = 0;
 
             var post = context.Posts.Include(t => t.BindTo).SingleOrDefault(t => t.Id == postId);
             if (post is null || post.BindTo is Post)
                 return 0;
 
-            var report = context.CreateReport(group, post);
+            var report = context.CreateReport(role.Group, post);
             var reportQuotes = context.GetReportItems(report).Include(t => t.FromQuote.User);
             var quotes = context
                 .GetQuotes(post)
@@ -358,7 +347,6 @@ namespace QuotePanel.QueryTypes
                 }
                 catch
                 {
-                    result = 0;
                 }
 
             context.AddReportItems(report, quotesForReports);
@@ -369,16 +357,14 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public int AddUsersToPost(IEnumerable<int> usersIds, int postId)
         {
-            if (group is null)
-                return -1;
 
-            var post = context.GetPosts(group).SingleOrDefault(t => t.Id == postId);
+            var post = context.GetPosts(role.Group).SingleOrDefault(t => t.Id == postId);
             if (post is null)
                 return -1;
 
             var usersInPost = context.GetQuotes(post).Select(t => t.User);
 
-            var users = context.GetUsers(group).Where(t => !usersInPost.Contains(t) && usersIds.Contains(t.Id));
+            var users = context.GetUsers(role.Group).Where(t => !usersInPost.Contains(t) && usersIds.Contains(t.Id));
 
             var count = users.Count();
             if (count == 0)
@@ -404,7 +390,7 @@ namespace QuotePanel.QueryTypes
 
             var users = context.Users
                                .Include(t => t.House)
-                               .Where(t => usersIds.Contains(t.Id) && (IsMainModer(forAdmin) || t.House == group))
+                               .Where(t => usersIds.Contains(t.Id) && (IsMainModer(forAdmin) || t.House == role.Group))
                                .AsEnumerable().GroupBy(t => t.House);
 
             foreach (var gr in users)
@@ -440,19 +426,19 @@ namespace QuotePanel.QueryTypes
         {
             var post = context.Posts
                 .Include(t => t.Quotes)
-                .FirstOrDefault(t => t.Id == postId && t.Group == group);
+                .FirstOrDefault(t => t.Id == postId && t.Group == role.Group);
 
             if (post == null)
                 return 0;
 
             //var quotes = post.Quotes.Where(t => quoteIds.Contains(t.Id));
-            return context.CreateReport(group, post)?.Id ?? 0;
+            return context.CreateReport(role.Group, post)?.Id ?? 0;
         }
 
         [Authorize(Policy = "GroupModer")]
         public bool CloseReport(int id, bool? forAdmin)
         {
-            var report = context.Reports.Include(t => t.FromPost).SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == group) && t.Id == id);
+            var report = context.Reports.Include(t => t.FromPost).SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == role.Group) && t.Id == id);
 
             if (report is null)
                 return false;
@@ -466,7 +452,7 @@ namespace QuotePanel.QueryTypes
 
         public bool DeletePost(int id, bool? forAdmin)
         {
-            var post = context.GetPosts(group).SingleOrDefault(t => t.Id == id);
+            var post = context.GetPosts(role.Group).SingleOrDefault(t => t.Id == id);
 
             if (post is null)
                 return false;
@@ -502,20 +488,25 @@ namespace QuotePanel.QueryTypes
         [Authorize(Policy = "GroupModer")]
         public async Task<bool> SendQrCode(int id, bool? forAdmin)
         {
-            if (!group.Configuration.WithQrCode)
+            if (!role.Group.Configuration.WithQrCode)
                 return false;
 
-            var report = context.Reports.SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == group) && t.Id == id);
+            //logger.LogInformation("Mutation: SendQrCode");
+
+            var report = context.Reports.SingleOrDefault(t => (IsMainModer(forAdmin) || t.Group == role.Group) && t.Id == id);
 
             if (report == null)
                 return false;
+
+            //logger.LogInformation($"Report: {id}");
 
             var groups = context.GetReportItems(report)
                 .Include(t => t.User.House)
                 .AsEnumerable()
                 .GroupBy(t => t.User.House);
 
-            var client = new HttpClient();
+            //logger.LogInformation($"Count: {groups.Sum(t => t.Count())}");
+
             var coder = new QRCoder.PngByteQRCode();
             QRCoder.QRCodeGenerator qrGenerator = new QRCoder.QRCodeGenerator();
 
@@ -557,7 +548,7 @@ namespace QuotePanel.QueryTypes
                     }
                     catch (Exception ex)
                     {
-
+                        //logger.LogError(ex, "Error");
                     }
             }
 

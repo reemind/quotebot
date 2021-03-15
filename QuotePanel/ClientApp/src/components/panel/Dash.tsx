@@ -18,6 +18,7 @@ const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
             <PageHeader
                 ghost={false}
                 title="Dashboard"
+                style={{ marginBottom: 20 }}
                 subTitle={
                     <Space>
                         {data?.groupInfo?.name}

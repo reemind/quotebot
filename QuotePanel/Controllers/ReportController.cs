@@ -18,35 +18,22 @@ namespace QuotePanel.Controllers
     public class PanelController : Controller
     {
         DataContext context;
-        Group group;
-        UserRole role;
+        GroupRole role;
 
         public PanelController(DataContext context, IHttpContextAccessor accessor)
         {
             var httpContext = accessor.HttpContext;
 
             this.context = context;
-            if (httpContext.User.HasClaim(t => t.Type == "Role"))
-                role = httpContext.User.Claims.First(t => t.Type == "Role").Value switch
-                {
-                    "User" => UserRole.User,
-                    "GroupModer" => UserRole.GroupModer,
-                    "GroupAdmin" => UserRole.GroupAdmin,
-                    "Moder" => UserRole.Moder,
-                    _ => UserRole.Admin
-                };
 
-            var claim = httpContext.User.Claims.FirstOrDefault(t => t.Type == "GroupId");
-
-            if (claim is Claim)
-                group = context.Groups.SingleOrDefault(t => t.Id == int.Parse(claim.Value));
+            role = context.GetDataFromClaims(httpContext.User);
         }
 
         [Route("report/{id}")]
         [Authorize(Policy = "GroupModer")]
         public IActionResult Report([FromRoute]int id)
         {
-            var report = context.GetReport(group, id);
+            var report = context.GetReport(role.Group, id);
 
             if (report == null)
                 return NotFound();

@@ -31,17 +31,18 @@ interface RouterProps { // type for `match.params`
     id: string; // must be type `string` since value comes from the URL
 }
 
-interface PostProps extends RouteComponentProps<RouterProps> {
+interface ReportProps extends RouteComponentProps<RouterProps> {
     // any other props (leave empty if none)
 }
 
-export const Report: React.FC<PostProps> = ({ match }) => {
+interface ReportState {
+    QrVisible: boolean
+}
+
+export const Report: React.FC<ReportProps> = ({ match }) => {
     const id: number = parseInt(match.params.id)
-    const [state, setState] = useState<{ max: number, QrVisible: boolean, name: string, selected: ReactText[] }>({
-        max: 0,
-        QrVisible: false,
-        name: "",
-        selected: []
+    const [state, setState] = useState<ReportState>({
+        QrVisible: false
     })
 
     const client = useApolloClient()
@@ -124,6 +125,7 @@ export const Report: React.FC<PostProps> = ({ match }) => {
                         </Dropdown>,
                     (data?.report?.closed ?
                         <Button onClick={() => {
+                            mesloading()
                             fetch("/provider/report/" + data?.report?.id, {
                                 method: 'GET',
                                 headers: new Headers({

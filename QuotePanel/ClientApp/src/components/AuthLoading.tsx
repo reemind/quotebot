@@ -6,12 +6,12 @@ import { Result, Button } from 'antd'
 import { Link } from 'react-router-dom'
 import { GET_TOKEN } from '../generated/queries'
 
-type LoginProps = {
+type AuthLoadingProps = {
     callback: (response: string) => void
     id: number,
 }
 
-export const AuthLoading: React.FC<LoginProps> = ({ callback, id }) => {
+export const AuthLoading: React.FC<AuthLoadingProps> = ({ callback, id }) => {
     const {data, loading, error} = useQuery<{token: string},QueryTypeTokenArgs>(GET_TOKEN, { variables: { groupId: id } })
 
     if(!loading && data)

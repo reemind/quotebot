@@ -29,11 +29,18 @@ const steps : { title: string, key:number, icon: any}[] = [
     },
 ]
 
-export class Auth extends React.Component<{
+interface AuthProps {
     code: string,
     redirectUri: string,
     authResultHandler: (status: "success" | "error") => void 
-}, { current: number, content: any}>{
+}
+
+interface AuthState {
+    current: number,
+    content: any
+}
+
+export class Auth extends React.Component<AuthProps, AuthState>{
 
     state = {current: 1, content: <div></div>}
 

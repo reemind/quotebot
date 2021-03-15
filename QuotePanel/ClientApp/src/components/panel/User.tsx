@@ -29,16 +29,18 @@ interface UserProps extends RouteComponentProps<RouterProps> {
     profileRole: number
 }
 
+interface UserState {
+    type: number,
+    msg: boolean,
+    maker: any,
+    name: string,
+    groupId: number,
+    modal2Visible: boolean
+}
+
 export const User: React.FC<UserProps> = ({ match, all, profileRole }) => {
     const id: number = parseInt(match.params.id)
-    const [state, setState] = useState<{
-        type: number,
-        msg: boolean,
-        maker: any,
-        name: string,
-        groupId: number,
-        modal2Visible: boolean
-    }>({
+    const [state, setState] = useState<UserState>({
         type: -1,
         msg: false,
         maker: null,

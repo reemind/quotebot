@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,12 +9,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using DatabaseContext;
+using Microsoft.EntityFrameworkCore;
 
 namespace QuotePanel
 {
     public static class Methods
     {
-        public static string CreateToken(List<Claim> claims, string role)
+        public static string CreateToken(List<Claim> claims, string role, DateTime? expires = null)
         {
 
             ClaimsIdentity claimsIdentity =
@@ -24,22 +27,38 @@ namespace QuotePanel
                 audience: AuthOptions.AUDIENCE,
                 notBefore: DateTime.Now,
                 claims: claimsIdentity.Claims,
-                expires: DateTime.Now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                expires: expires ?? DateTime.Now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        static AesManaged aes = new AesManaged();
-        static byte[] key = Convert.FromBase64String("mwp6/KOL/DDCEuyO9GGw4uxcjPUMAPq+yKuGwTiXqlE=");
-        static byte[] IV = Convert.FromBase64String("tUkia+XYhiB0VogjzJQG1g==");
+        public static GroupRole GetDataFromClaims(this DataContext context, ClaimsPrincipal user)
+        {
+            var claims = user.Claims;
+
+            if (!user.HasClaim(t => t.Type == "RoleId"))
+                return null;
+
+            var roleId = int.Parse(claims.First(t => t.Type == "RoleId").Value);
+            if (user.HasClaim(t => t.Type == "RoleId"))
+                return context.GroupsRoles
+                    .Include(t => t.Group)
+                    .Include(t => t.User)
+                    .SingleOrDefault(t => t.Id == roleId);
+
+            return null;
+        }
+
+        
+        public static AesManager Manager { get; } = new AesManager();
 
         public static byte[] EncryptCode(int id)
         {
             try
             {
                 var inputBytes = BitConverter.GetBytes(id);
-                return aes.CreateEncryptor(key, IV).TransformFinalBlock(inputBytes, 0, inputBytes.Length);
+                return Manager.Encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
             }
             catch
             {
@@ -51,7 +70,7 @@ namespace QuotePanel
         {
             try
             {
-                var outputBytes = aes.CreateDecryptor(key, IV).TransformFinalBlock(encrypted, 0, encrypted.Length);
+                var outputBytes = Manager.Decryptor.TransformFinalBlock(encrypted, 0, encrypted.Length);
                 return BitConverter.ToInt32(outputBytes);
             }
             catch
@@ -65,5 +84,30 @@ namespace QuotePanel
 
         public static string EncryptCodeString(int id)
             => HttpUtility.UrlEncode(Convert.ToBase64String(EncryptCode(id)));
+    }
+
+    public class AesManager
+    {
+        AesManaged aes { get; } = new AesManaged();
+        public byte[] Key { get; set; }
+        public byte[] IV { get; set; }
+
+        public void SetData(string key, string iv)
+        {
+            Key = Convert.FromBase64String(key);
+            IV = Convert.FromBase64String(iv);
+        }
+
+        public void SetData(IConfigurationSection section)
+        {
+            Key = Convert.FromBase64String(section.GetValue<string>("Key"));
+            IV = Convert.FromBase64String(section.GetValue<string>("IV"));
+        }
+
+        public ICryptoTransform Encryptor
+            => aes.CreateEncryptor(Key, IV);
+
+        public ICryptoTransform Decryptor
+            => aes.CreateDecryptor(Key, IV);
     }
 }

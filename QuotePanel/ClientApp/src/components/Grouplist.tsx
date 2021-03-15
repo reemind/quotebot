@@ -2,7 +2,7 @@ import { Card, Space } from "antd";
 import { Maybe } from "graphql/jsutils/Maybe";
 import React from "react";
 import { GroupType } from "../generated/graphql";
-import './Grouplist.sass'
+import './Grouplist.less'
 import { RoleTag } from "./comps/DataTags";
 
 type GrouplistProps = {

@@ -277,3 +277,30 @@ query GetReportCode($id: Int!) {
     reportCode(id: $id)
 }
 `;
+
+export const USER_GET_QUERIES = gql`
+query GetUserInfo{
+    userInfo{
+        quotes{
+            id
+            post{
+                text
+                max
+            }
+        }
+        reportItems{
+            id
+            fromPost{
+                text
+                max
+            }
+            closed
+        }
+    }
+}
+`;
+
+export const GET_LIFETIME_TOKEN = gql`
+query GetPost {
+    lifetimeToken
+}`;

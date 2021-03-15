@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.sass';
+import './index.less';
 import App from './App';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider } from '@apollo/client';
@@ -18,7 +17,8 @@ const logoutLink = onError(({ graphQLErrors, networkError, forward, operation })
         for (let err of graphQLErrors) {
             switch (err.extensions?.code) {
                 case 'AUTH_NOT_AUTHORIZED':
-                    if (history.location.pathname.startsWith('/panel'))
+                    if (history.location.pathname.startsWith('/panel') ||
+                        history.location.pathname.startsWith('/user'))
                         history.push("/logout");
             }
         }

@@ -35,11 +35,18 @@ interface PostProps extends RouteComponentProps<RouterProps> {
     // any other props (leave empty if none)
 }
 
+interface PostState {
+    max: number,
+    drawer: boolean,
+    name: string,
+    selected: ReactText[]
+}
+
 export const Post: React.FC<PostProps> = ({ match }) => {
     const id: number = parseInt(match.params.id)
 
     const history = useHistory()
-    const [state, setState] = useState<{ max: number, drawer: boolean, name: string, selected: ReactText[] }>({
+    const [state, setState] = useState<PostState>({
         max: 0,
         drawer: false,
         name: "",
@@ -85,7 +92,8 @@ export const Post: React.FC<PostProps> = ({ match }) => {
                 errorMes()
             refetch()
         },
-        onError: () => errorMes()
+        onError: () => errorMes(),
+        refetchQueries: ["GetReports"]
     })
 
     if (!id || (data && !data?.post))

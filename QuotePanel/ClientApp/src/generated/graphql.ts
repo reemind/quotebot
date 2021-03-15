@@ -24,6 +24,7 @@ export type QueryType = {
   authGroups?: Maybe<GroupResponseType>;
   groupInfo?: Maybe<GroupInfoType>;
   groups?: Maybe<GroupInfoTypeConnection>;
+  lifetimeToken?: Maybe<Scalars['String']>;
   post?: Maybe<PostType>;
   posts?: Maybe<PostTypeConnection>;
   profile?: Maybe<UserType>;
@@ -37,6 +38,7 @@ export type QueryType = {
   stat?: Maybe<StatType>;
   token?: Maybe<Scalars['String']>;
   user?: Maybe<UserType>;
+  userInfo?: Maybe<UserInfoType>;
   userRoles?: Maybe<Array<Maybe<RoleType>>>;
   users?: Maybe<UserTypeConnection>;
 };
@@ -60,8 +62,6 @@ export type QueryTypeGroupsArgs = {
   before?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['PaginationAmount']>;
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<GroupInfoTypeSort>;
-  where?: Maybe<GroupInfoTypeFilter>;
 };
 
 
@@ -75,8 +75,6 @@ export type QueryTypePostsArgs = {
   before?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['PaginationAmount']>;
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<PostTypeSort>;
-  where?: Maybe<PostTypeFilter>;
 };
 
 
@@ -85,8 +83,6 @@ export type QueryTypeQoutesArgs = {
   before?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['PaginationAmount']>;
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<QuoteTypeSort>;
-  where?: Maybe<QuoteTypeFilter>;
 };
 
 
@@ -96,8 +92,6 @@ export type QueryTypeQoutesByPostArgs = {
   first?: Maybe<Scalars['PaginationAmount']>;
   id: Scalars['Int'];
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<QuoteTypeSort>;
-  where?: Maybe<QuoteTypeFilter>;
 };
 
 
@@ -108,8 +102,6 @@ export type QueryTypeQoutesByUserArgs = {
   forAdmin?: Maybe<Scalars['Boolean']>;
   id: Scalars['Int'];
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<QuoteTypeSort>;
-  where?: Maybe<QuoteTypeFilter>;
 };
 
 
@@ -129,8 +121,6 @@ export type QueryTypeReportItemsArgs = {
   first?: Maybe<Scalars['PaginationAmount']>;
   id: Scalars['Int'];
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<ReportItemTypeSort>;
-  where?: Maybe<ReportItemTypeFilter>;
 };
 
 
@@ -172,8 +162,6 @@ export type QueryTypeUsersArgs = {
   first?: Maybe<Scalars['PaginationAmount']>;
   forAdmin?: Maybe<Scalars['Boolean']>;
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<UserTypeSort>;
-  where?: Maybe<UserTypeFilter>;
 };
 
 export type MutationType = {
@@ -338,9 +326,17 @@ export type ReportType = {
 
 export type ReportItemType = {
   __typename?: 'ReportItemType';
+  closed?: Maybe<Scalars['Boolean']>;
+  fromPost?: Maybe<PostType>;
   id: Scalars['Int'];
   user?: Maybe<UserType>;
   verified: Scalars['Boolean'];
+};
+
+export type UserInfoType = {
+  __typename?: 'UserInfoType';
+  quotes?: Maybe<Array<Maybe<QuoteType>>>;
+  reportItems?: Maybe<Array<Maybe<ReportItemType>>>;
 };
 
 export type GroupInfoType = {
@@ -357,286 +353,6 @@ export type GroupInfoType = {
   token?: Maybe<Scalars['String']>;
   withFilter?: Maybe<Scalars['Boolean']>;
   withQrCode?: Maybe<Scalars['Boolean']>;
-};
-
-export type UserTypeFilter = {
-  AND?: Maybe<Array<UserTypeFilter>>;
-  buildNumber?: Maybe<Scalars['String']>;
-  buildNumber_contains?: Maybe<Scalars['String']>;
-  buildNumber_ends_with?: Maybe<Scalars['String']>;
-  buildNumber_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  buildNumber_not?: Maybe<Scalars['String']>;
-  buildNumber_not_contains?: Maybe<Scalars['String']>;
-  buildNumber_not_ends_with?: Maybe<Scalars['String']>;
-  buildNumber_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  buildNumber_not_starts_with?: Maybe<Scalars['String']>;
-  buildNumber_starts_with?: Maybe<Scalars['String']>;
-  id?: Maybe<Scalars['Int']>;
-  id_gt?: Maybe<Scalars['Int']>;
-  id_gte?: Maybe<Scalars['Int']>;
-  id_in?: Maybe<Array<Scalars['Int']>>;
-  id_lt?: Maybe<Scalars['Int']>;
-  id_lte?: Maybe<Scalars['Int']>;
-  id_not?: Maybe<Scalars['Int']>;
-  id_not_gt?: Maybe<Scalars['Int']>;
-  id_not_gte?: Maybe<Scalars['Int']>;
-  id_not_in?: Maybe<Array<Scalars['Int']>>;
-  id_not_lt?: Maybe<Scalars['Int']>;
-  id_not_lte?: Maybe<Scalars['Int']>;
-  img?: Maybe<Scalars['String']>;
-  img_contains?: Maybe<Scalars['String']>;
-  img_ends_with?: Maybe<Scalars['String']>;
-  img_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  img_not?: Maybe<Scalars['String']>;
-  img_not_contains?: Maybe<Scalars['String']>;
-  img_not_ends_with?: Maybe<Scalars['String']>;
-  img_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  img_not_starts_with?: Maybe<Scalars['String']>;
-  img_starts_with?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-  name_contains?: Maybe<Scalars['String']>;
-  name_ends_with?: Maybe<Scalars['String']>;
-  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  name_not?: Maybe<Scalars['String']>;
-  name_not_contains?: Maybe<Scalars['String']>;
-  name_not_ends_with?: Maybe<Scalars['String']>;
-  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  name_not_starts_with?: Maybe<Scalars['String']>;
-  name_starts_with?: Maybe<Scalars['String']>;
-  OR?: Maybe<Array<UserTypeFilter>>;
-  role?: Maybe<Scalars['Int']>;
-  role_gt?: Maybe<Scalars['Int']>;
-  role_gte?: Maybe<Scalars['Int']>;
-  role_in?: Maybe<Array<Scalars['Int']>>;
-  role_lt?: Maybe<Scalars['Int']>;
-  role_lte?: Maybe<Scalars['Int']>;
-  role_not?: Maybe<Scalars['Int']>;
-  role_not_gt?: Maybe<Scalars['Int']>;
-  role_not_gte?: Maybe<Scalars['Int']>;
-  role_not_in?: Maybe<Array<Scalars['Int']>>;
-  role_not_lt?: Maybe<Scalars['Int']>;
-  role_not_lte?: Maybe<Scalars['Int']>;
-  room?: Maybe<Scalars['Int']>;
-  room_gt?: Maybe<Scalars['Int']>;
-  room_gte?: Maybe<Scalars['Int']>;
-  room_in?: Maybe<Array<Scalars['Int']>>;
-  room_lt?: Maybe<Scalars['Int']>;
-  room_lte?: Maybe<Scalars['Int']>;
-  room_not?: Maybe<Scalars['Int']>;
-  room_not_gt?: Maybe<Scalars['Int']>;
-  room_not_gte?: Maybe<Scalars['Int']>;
-  room_not_in?: Maybe<Array<Scalars['Int']>>;
-  room_not_lt?: Maybe<Scalars['Int']>;
-  room_not_lte?: Maybe<Scalars['Int']>;
-  vkId?: Maybe<Scalars['Long']>;
-  vkId_gt?: Maybe<Scalars['Long']>;
-  vkId_gte?: Maybe<Scalars['Long']>;
-  vkId_in?: Maybe<Array<Scalars['Long']>>;
-  vkId_lt?: Maybe<Scalars['Long']>;
-  vkId_lte?: Maybe<Scalars['Long']>;
-  vkId_not?: Maybe<Scalars['Long']>;
-  vkId_not_gt?: Maybe<Scalars['Long']>;
-  vkId_not_gte?: Maybe<Scalars['Long']>;
-  vkId_not_in?: Maybe<Array<Scalars['Long']>>;
-  vkId_not_lt?: Maybe<Scalars['Long']>;
-  vkId_not_lte?: Maybe<Scalars['Long']>;
-};
-
-export type UserTypeSort = {
-  buildNumber?: Maybe<SortOperationKind>;
-  id?: Maybe<SortOperationKind>;
-  img?: Maybe<SortOperationKind>;
-  name?: Maybe<SortOperationKind>;
-  role?: Maybe<SortOperationKind>;
-  room?: Maybe<SortOperationKind>;
-  vkId?: Maybe<SortOperationKind>;
-};
-
-export type QuoteTypeFilter = {
-  AND?: Maybe<Array<QuoteTypeFilter>>;
-  id?: Maybe<Scalars['Int']>;
-  id_gt?: Maybe<Scalars['Int']>;
-  id_gte?: Maybe<Scalars['Int']>;
-  id_in?: Maybe<Array<Scalars['Int']>>;
-  id_lt?: Maybe<Scalars['Int']>;
-  id_lte?: Maybe<Scalars['Int']>;
-  id_not?: Maybe<Scalars['Int']>;
-  id_not_gt?: Maybe<Scalars['Int']>;
-  id_not_gte?: Maybe<Scalars['Int']>;
-  id_not_in?: Maybe<Array<Scalars['Int']>>;
-  id_not_lt?: Maybe<Scalars['Int']>;
-  id_not_lte?: Maybe<Scalars['Int']>;
-  isOut?: Maybe<Scalars['Boolean']>;
-  isOut_not?: Maybe<Scalars['Boolean']>;
-  OR?: Maybe<Array<QuoteTypeFilter>>;
-};
-
-export type QuoteTypeSort = {
-  id?: Maybe<SortOperationKind>;
-  isOut?: Maybe<SortOperationKind>;
-};
-
-export type PostTypeFilter = {
-  AND?: Maybe<Array<PostTypeFilter>>;
-  deleted?: Maybe<Scalars['Boolean']>;
-  deleted_not?: Maybe<Scalars['Boolean']>;
-  id?: Maybe<Scalars['Int']>;
-  id_gt?: Maybe<Scalars['Int']>;
-  id_gte?: Maybe<Scalars['Int']>;
-  id_in?: Maybe<Array<Scalars['Int']>>;
-  id_lt?: Maybe<Scalars['Int']>;
-  id_lte?: Maybe<Scalars['Int']>;
-  id_not?: Maybe<Scalars['Int']>;
-  id_not_gt?: Maybe<Scalars['Int']>;
-  id_not_gte?: Maybe<Scalars['Int']>;
-  id_not_in?: Maybe<Array<Scalars['Int']>>;
-  id_not_lt?: Maybe<Scalars['Int']>;
-  id_not_lte?: Maybe<Scalars['Int']>;
-  isRepost?: Maybe<Scalars['Boolean']>;
-  isRepost_not?: Maybe<Scalars['Boolean']>;
-  max?: Maybe<Scalars['Int']>;
-  max_gt?: Maybe<Scalars['Int']>;
-  max_gte?: Maybe<Scalars['Int']>;
-  max_in?: Maybe<Array<Scalars['Int']>>;
-  max_lt?: Maybe<Scalars['Int']>;
-  max_lte?: Maybe<Scalars['Int']>;
-  max_not?: Maybe<Scalars['Int']>;
-  max_not_gt?: Maybe<Scalars['Int']>;
-  max_not_gte?: Maybe<Scalars['Int']>;
-  max_not_in?: Maybe<Array<Scalars['Int']>>;
-  max_not_lt?: Maybe<Scalars['Int']>;
-  max_not_lte?: Maybe<Scalars['Int']>;
-  OR?: Maybe<Array<PostTypeFilter>>;
-  text?: Maybe<Scalars['String']>;
-  text_contains?: Maybe<Scalars['String']>;
-  text_ends_with?: Maybe<Scalars['String']>;
-  text_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  text_not?: Maybe<Scalars['String']>;
-  text_not_contains?: Maybe<Scalars['String']>;
-  text_not_ends_with?: Maybe<Scalars['String']>;
-  text_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  text_not_starts_with?: Maybe<Scalars['String']>;
-  text_starts_with?: Maybe<Scalars['String']>;
-};
-
-export type PostTypeSort = {
-  deleted?: Maybe<SortOperationKind>;
-  id?: Maybe<SortOperationKind>;
-  isRepost?: Maybe<SortOperationKind>;
-  max?: Maybe<SortOperationKind>;
-  text?: Maybe<SortOperationKind>;
-};
-
-export type GroupInfoTypeFilter = {
-  AND?: Maybe<Array<GroupInfoTypeFilter>>;
-  buildNumber?: Maybe<Scalars['String']>;
-  buildNumber_contains?: Maybe<Scalars['String']>;
-  buildNumber_ends_with?: Maybe<Scalars['String']>;
-  buildNumber_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  buildNumber_not?: Maybe<Scalars['String']>;
-  buildNumber_not_contains?: Maybe<Scalars['String']>;
-  buildNumber_not_ends_with?: Maybe<Scalars['String']>;
-  buildNumber_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  buildNumber_not_starts_with?: Maybe<Scalars['String']>;
-  buildNumber_starts_with?: Maybe<Scalars['String']>;
-  enabled?: Maybe<Scalars['Boolean']>;
-  enabled_not?: Maybe<Scalars['Boolean']>;
-  filterPattern?: Maybe<Scalars['String']>;
-  filterPattern_contains?: Maybe<Scalars['String']>;
-  filterPattern_ends_with?: Maybe<Scalars['String']>;
-  filterPattern_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  filterPattern_not?: Maybe<Scalars['String']>;
-  filterPattern_not_contains?: Maybe<Scalars['String']>;
-  filterPattern_not_ends_with?: Maybe<Scalars['String']>;
-  filterPattern_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  filterPattern_not_starts_with?: Maybe<Scalars['String']>;
-  filterPattern_starts_with?: Maybe<Scalars['String']>;
-  groupId?: Maybe<Scalars['Long']>;
-  groupId_gt?: Maybe<Scalars['Long']>;
-  groupId_gte?: Maybe<Scalars['Long']>;
-  groupId_in?: Maybe<Array<Maybe<Scalars['Long']>>>;
-  groupId_lt?: Maybe<Scalars['Long']>;
-  groupId_lte?: Maybe<Scalars['Long']>;
-  groupId_not?: Maybe<Scalars['Long']>;
-  groupId_not_gt?: Maybe<Scalars['Long']>;
-  groupId_not_gte?: Maybe<Scalars['Long']>;
-  groupId_not_in?: Maybe<Array<Maybe<Scalars['Long']>>>;
-  groupId_not_lt?: Maybe<Scalars['Long']>;
-  groupId_not_lte?: Maybe<Scalars['Long']>;
-  id?: Maybe<Scalars['Int']>;
-  id_gt?: Maybe<Scalars['Int']>;
-  id_gte?: Maybe<Scalars['Int']>;
-  id_in?: Maybe<Array<Maybe<Scalars['Int']>>>;
-  id_lt?: Maybe<Scalars['Int']>;
-  id_lte?: Maybe<Scalars['Int']>;
-  id_not?: Maybe<Scalars['Int']>;
-  id_not_gt?: Maybe<Scalars['Int']>;
-  id_not_gte?: Maybe<Scalars['Int']>;
-  id_not_in?: Maybe<Array<Maybe<Scalars['Int']>>>;
-  id_not_lt?: Maybe<Scalars['Int']>;
-  id_not_lte?: Maybe<Scalars['Int']>;
-  key?: Maybe<Scalars['String']>;
-  keyboard?: Maybe<Scalars['Boolean']>;
-  keyboard_not?: Maybe<Scalars['Boolean']>;
-  key_contains?: Maybe<Scalars['String']>;
-  key_ends_with?: Maybe<Scalars['String']>;
-  key_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  key_not?: Maybe<Scalars['String']>;
-  key_not_contains?: Maybe<Scalars['String']>;
-  key_not_ends_with?: Maybe<Scalars['String']>;
-  key_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  key_not_starts_with?: Maybe<Scalars['String']>;
-  key_starts_with?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-  name_contains?: Maybe<Scalars['String']>;
-  name_ends_with?: Maybe<Scalars['String']>;
-  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  name_not?: Maybe<Scalars['String']>;
-  name_not_contains?: Maybe<Scalars['String']>;
-  name_not_ends_with?: Maybe<Scalars['String']>;
-  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  name_not_starts_with?: Maybe<Scalars['String']>;
-  name_starts_with?: Maybe<Scalars['String']>;
-  OR?: Maybe<Array<GroupInfoTypeFilter>>;
-  secret?: Maybe<Scalars['String']>;
-  secret_contains?: Maybe<Scalars['String']>;
-  secret_ends_with?: Maybe<Scalars['String']>;
-  secret_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  secret_not?: Maybe<Scalars['String']>;
-  secret_not_contains?: Maybe<Scalars['String']>;
-  secret_not_ends_with?: Maybe<Scalars['String']>;
-  secret_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  secret_not_starts_with?: Maybe<Scalars['String']>;
-  secret_starts_with?: Maybe<Scalars['String']>;
-  token?: Maybe<Scalars['String']>;
-  token_contains?: Maybe<Scalars['String']>;
-  token_ends_with?: Maybe<Scalars['String']>;
-  token_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  token_not?: Maybe<Scalars['String']>;
-  token_not_contains?: Maybe<Scalars['String']>;
-  token_not_ends_with?: Maybe<Scalars['String']>;
-  token_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  token_not_starts_with?: Maybe<Scalars['String']>;
-  token_starts_with?: Maybe<Scalars['String']>;
-  withFilter?: Maybe<Scalars['Boolean']>;
-  withFilter_not?: Maybe<Scalars['Boolean']>;
-  withQrCode?: Maybe<Scalars['Boolean']>;
-  withQrCode_not?: Maybe<Scalars['Boolean']>;
-};
-
-export type GroupInfoTypeSort = {
-  buildNumber?: Maybe<SortOperationKind>;
-  enabled?: Maybe<SortOperationKind>;
-  filterPattern?: Maybe<SortOperationKind>;
-  groupId?: Maybe<SortOperationKind>;
-  id?: Maybe<SortOperationKind>;
-  key?: Maybe<SortOperationKind>;
-  keyboard?: Maybe<SortOperationKind>;
-  name?: Maybe<SortOperationKind>;
-  secret?: Maybe<SortOperationKind>;
-  token?: Maybe<SortOperationKind>;
-  withFilter?: Maybe<SortOperationKind>;
-  withQrCode?: Maybe<SortOperationKind>;
 };
 
 export type ReportTypeFilter = {
@@ -685,30 +401,6 @@ export type ReportTypeSort = {
   id?: Maybe<SortOperationKind>;
   max?: Maybe<SortOperationKind>;
   name?: Maybe<SortOperationKind>;
-};
-
-export type ReportItemTypeFilter = {
-  AND?: Maybe<Array<ReportItemTypeFilter>>;
-  id?: Maybe<Scalars['Int']>;
-  id_gt?: Maybe<Scalars['Int']>;
-  id_gte?: Maybe<Scalars['Int']>;
-  id_in?: Maybe<Array<Scalars['Int']>>;
-  id_lt?: Maybe<Scalars['Int']>;
-  id_lte?: Maybe<Scalars['Int']>;
-  id_not?: Maybe<Scalars['Int']>;
-  id_not_gt?: Maybe<Scalars['Int']>;
-  id_not_gte?: Maybe<Scalars['Int']>;
-  id_not_in?: Maybe<Array<Scalars['Int']>>;
-  id_not_lt?: Maybe<Scalars['Int']>;
-  id_not_lte?: Maybe<Scalars['Int']>;
-  OR?: Maybe<Array<ReportItemTypeFilter>>;
-  verified?: Maybe<Scalars['Boolean']>;
-  verified_not?: Maybe<Scalars['Boolean']>;
-};
-
-export type ReportItemTypeSort = {
-  id?: Maybe<SortOperationKind>;
-  verified?: Maybe<SortOperationKind>;
 };
 
 

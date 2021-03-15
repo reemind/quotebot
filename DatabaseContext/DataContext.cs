@@ -71,6 +71,9 @@ namespace DatabaseContext
         public IQueryable<Report> GetReports(Group group)
             => Reports.Include(t => t.FromPost).Where(t => t.Group == group);
 
+        public IQueryable<ReportItem> GetReportItems(GroupRole groupRole)
+            => ReportItems.Where(t => t.Report.Group == groupRole.Group && t.User == groupRole.User);
+
         public Report GetReport(Group group, int id)
             => Reports.Include(t => t.FromPost).FirstOrDefault(t => t.Group == group && t.Id == id);
 

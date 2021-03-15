@@ -1,0 +1,483 @@
+schema {
+  query: QueryType
+  mutation: MutationType
+}
+
+"""The cost directives is used to express the complexity of a field."""
+directive @cost(
+  """Defines the complexity of the field."""
+  complexity: Int! = 1
+
+  """Defines field arguments that act as complexity multipliers."""
+  multipliers: [MultiplierPath!]
+) on FIELD_DEFINITION
+
+directive @authorize(
+  """
+  The name of the authorization policy that determines access to the annotated resource.
+  """
+  policy: String
+
+  """Roles that are allowed to access to the annotated resource."""
+  roles: [String!]
+) on OBJECT | FIELD_DEFINITION
+
+type Config {
+  enabled: Boolean!
+  filterPattern: String
+  keyboard: Boolean!
+  withFilter: Boolean!
+  withQrCode: Boolean!
+}
+
+"""The `DateTime` scalar represents an ISO-8601 compliant date time type."""
+scalar DateTime
+
+type Group {
+  buildNumber: String
+  configJson: String
+  configuration: Config
+  groupId: Long!
+  id: Int!
+  key: String
+  name: String
+  posts: [Post]
+  reports: [Report]
+  roles: [GroupRole]
+  secret: String
+  token: String
+}
+
+type GroupInfoType {
+  buildNumber: String
+  enabled: Boolean
+  filterPattern: String
+  groupId: Long
+  id: Int
+  key: String
+  keyboard: Boolean
+  name: String
+  secret: String
+  token: String
+  withFilter: Boolean
+  withQrCode: Boolean
+}
+
+"""A connection to a list of items."""
+type GroupInfoTypeConnection {
+  """A list of edges."""
+  edges: [GroupInfoTypeEdge!]
+
+  """A flattened list of the nodes."""
+  nodes: [GroupInfoType]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type GroupInfoTypeEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: GroupInfoType
+}
+
+input GroupInfoTypeInput {
+  buildNumber: String
+  enabled: Boolean
+  filterPattern: String
+  groupId: Long
+  id: Int
+  key: String
+  keyboard: Boolean
+  name: String
+  secret: String
+  token: String
+  withFilter: Boolean
+  withQrCode: Boolean
+}
+
+type GroupResponseType {
+  groups: [GroupType]
+  token: String
+}
+
+type GroupRole {
+  group: Group!
+  id: Int!
+  role: UserRole!
+  user: User!
+}
+
+type GroupType {
+  id: Long!
+  name: String
+  role: Int!
+}
+
+"""
+The `Long` scalar type represents non-fractional signed whole 64-bit numeric
+values. Long can represent values between -(2^63) and 2^63 - 1.
+"""
+scalar Long
+
+"""
+The multiplier path scalar represents a valid GraphQL multiplier path string.
+"""
+scalar MultiplierPath
+
+type MutationType {
+  addUsersToPost(postId: Int!, usersIds: [Int!]): Int!
+  closeReport(forAdmin: Boolean, id: Int!): Boolean!
+  confirmQrCode(eReport: String, eReportItem: String): UserType
+  createFromToken(groupName: String, token: String): Int!
+  createReport(postId: Int!, quoteIds: [Int!]): Int!
+  deletePost(forAdmin: Boolean, id: Int!): Boolean!
+  editPostInfo(id: Int!, newMax: Int, newName: String): Boolean!
+  editUserInfo(forAdmin: Boolean, groupId: Int, id: Int!, newName: String, newType: Int): Boolean!
+  notifyUsers(postId: Int!, quotesId: [Int!]): Int!
+  removeRole(id: Int!): Boolean!
+  sendQrCode(forAdmin: Boolean, id: Int!): Boolean!
+  sendUsers(forAdmin: Boolean, message: String, usersIds: [Int!]): Boolean!
+  switchQuoteVal(forAdmin: Boolean, id: Int!): Boolean!
+  switchVerificationVal(forAdmin: Boolean, id: Int!): Boolean!
+  updateGroup(forAdmin: Boolean, id: Int, inputGroup: GroupInfoTypeInput, newGroup: Boolean): Boolean!
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+
+  """
+  Indicates whether more edges exist following the set defined by the clients arguments.
+  """
+  hasNextPage: Boolean!
+
+  """
+  Indicates whether more edges exist prior the set defined by the clients arguments.
+  """
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+}
+
+scalar PaginationAmount
+
+type Post {
+  bindTo: Post
+  deleted: Boolean!
+  group: Group
+  id: Int!
+  max: Int!
+  postId: Long!
+  quotes: [Quote]
+  text: String
+  time: DateTime!
+}
+
+type PostType {
+  deleted: Boolean!
+  id: Int!
+  isRepost: Boolean!
+  max: Int!
+  text: String
+}
+
+"""A connection to a list of items."""
+type PostTypeConnection {
+  """A list of edges."""
+  edges: [PostTypeEdge!]
+
+  """A flattened list of the nodes."""
+  nodes: [PostType]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type PostTypeEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: PostType
+}
+
+type QueryType {
+  authGroups(code: String, redirectUri: String): GroupResponseType
+  groupInfo(forAdmin: Boolean, id: Int, newGroup: Boolean): GroupInfoType
+  groups(after: String, before: String, first: PaginationAmount, last: PaginationAmount): GroupInfoTypeConnection
+  lifetimeToken: String
+  post(id: Int!): PostType
+  posts(after: String, before: String, first: PaginationAmount, last: PaginationAmount): PostTypeConnection
+  profile: UserType
+  qoutes(after: String, before: String, first: PaginationAmount, last: PaginationAmount): QuoteTypeConnection
+  qoutesByPost(after: String, before: String, first: PaginationAmount, id: Int!, last: PaginationAmount): QuoteTypeConnection
+  qoutesByUser(after: String, before: String, first: PaginationAmount, forAdmin: Boolean, id: Int!, last: PaginationAmount): QuoteTypeConnection
+  report(id: Int!): ReportType
+  reportCode(id: Int!): String
+  reportItems(after: String, before: String, first: PaginationAmount, id: Int!, last: PaginationAmount): ReportItemTypeConnection
+  reports(after: String, before: String, first: PaginationAmount, last: PaginationAmount, order_by: ReportTypeSort, where: ReportTypeFilter): ReportTypeConnection
+  stat(forAdmin: Boolean, groupId: Int): StatType
+  token(groupId: Long!): String
+  user(forAdmin: Boolean, id: Int!): UserType
+  userInfo: UserInfoType
+  userRoles(id: Int!): [RoleType]
+  users(after: String, before: String, first: PaginationAmount, forAdmin: Boolean, last: PaginationAmount): UserTypeConnection
+}
+
+type Quote {
+  commentId: Long!
+  id: Int!
+  isOut: Boolean!
+  post: Post
+  time: DateTime!
+  user: User
+}
+
+type QuoteType {
+  id: Int!
+  isOut: Boolean!
+  post: PostType
+  user: UserType
+}
+
+"""A connection to a list of items."""
+type QuoteTypeConnection {
+  """A list of edges."""
+  edges: [QuoteTypeEdge!]
+
+  """A flattened list of the nodes."""
+  nodes: [QuoteType]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type QuoteTypeEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: QuoteType
+}
+
+type Report {
+  closed: Boolean!
+  fromPost: Post
+  group: Group
+  id: Int!
+  items: [ReportItem]
+  max: Int!
+  name: String
+}
+
+type ReportItem {
+  fromQuote: Quote
+  id: Int!
+  report: Report
+  user: User
+  verified: Boolean!
+}
+
+type ReportItemType {
+  closed: Boolean
+  fromPost: PostType
+  id: Int!
+  user: UserType
+  verified: Boolean!
+}
+
+"""A connection to a list of items."""
+type ReportItemTypeConnection {
+  """A list of edges."""
+  edges: [ReportItemTypeEdge!]
+
+  """A flattened list of the nodes."""
+  nodes: [ReportItemType]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type ReportItemTypeEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: ReportItemType
+}
+
+type ReportType {
+  closed: Boolean!
+  fromPost: PostType
+  id: Int!
+  max: Int!
+  name: String
+}
+
+"""A connection to a list of items."""
+type ReportTypeConnection {
+  """A list of edges."""
+  edges: [ReportTypeEdge!]
+
+  """A flattened list of the nodes."""
+  nodes: [ReportType]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type ReportTypeEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: ReportType
+}
+
+input ReportTypeFilter {
+  AND: [ReportTypeFilter!]
+  closed: Boolean
+  closed_not: Boolean
+  id: Int
+  id_gt: Int
+  id_gte: Int
+  id_in: [Int!]
+  id_lt: Int
+  id_lte: Int
+  id_not: Int
+  id_not_gt: Int
+  id_not_gte: Int
+  id_not_in: [Int!]
+  id_not_lt: Int
+  id_not_lte: Int
+  max: Int
+  max_gt: Int
+  max_gte: Int
+  max_in: [Int!]
+  max_lt: Int
+  max_lte: Int
+  max_not: Int
+  max_not_gt: Int
+  max_not_gte: Int
+  max_not_in: [Int!]
+  max_not_lt: Int
+  max_not_lte: Int
+  name: String
+  name_contains: String
+  name_ends_with: String
+  name_in: [String]
+  name_not: String
+  name_not_contains: String
+  name_not_ends_with: String
+  name_not_in: [String]
+  name_not_starts_with: String
+  name_starts_with: String
+  OR: [ReportTypeFilter!]
+}
+
+input ReportTypeSort {
+  closed: SortOperationKind
+  id: SortOperationKind
+  max: SortOperationKind
+  name: SortOperationKind
+}
+
+type RoleType {
+  buildNumber: String
+  id: Int!
+  name: String
+  role: Int!
+}
+
+enum SortOperationKind {
+  ASC
+  DESC
+}
+
+type StatFloorType {
+  count: Int!
+  floor: Int!
+}
+
+type StatQuoteType {
+  count: Int!
+  date: String
+}
+
+type StatType {
+  statFloor: [StatFloorType]
+  statQuotes: [StatQuoteType]
+}
+
+type User {
+  house: Group
+  id: Int!
+  img: String
+  name: String
+  quotes: [Quote]
+  roles: [GroupRole]
+  room: Int!
+  vkId: Long!
+}
+
+type UserInfoType {
+  quotes: [QuoteType]
+  reportItems: [ReportItemType]
+}
+
+enum UserRole {
+  USER
+  GROUPMODER
+  GROUPADMIN
+  MODER
+  ADMIN
+}
+
+type UserType {
+  buildNumber: String
+  group: Group
+  id: Int!
+  img: String
+  name: String
+  role: Int!
+  room: Int!
+  vkId: Long!
+}
+
+"""A connection to a list of items."""
+type UserTypeConnection {
+  """A list of edges."""
+  edges: [UserTypeEdge!]
+
+  """A flattened list of the nodes."""
+  nodes: [UserType]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type UserTypeEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: UserType
+}
+

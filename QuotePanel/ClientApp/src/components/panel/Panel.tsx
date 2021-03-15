@@ -1,19 +1,19 @@
 import React, { useState } from "react";
-import './Panel.sass'
-import { Layout, Menu, Space, Col, Row, Button, Switch as CheckSwitch } from 'antd'
+import './Panel.less'
+import { Layout, Menu, Space, Col, Row, Button, Switch as CheckSwitch, Modal, message } from 'antd'
 import { SettingOutlined, LogoutOutlined, DashboardOutlined, BorderlessTableOutlined, LoadingOutlined, SnippetsOutlined, MenuOutlined } from "@ant-design/icons";
 import { Redirect, useHistory, Switch, Route } from "react-router-dom";
 import Users from "./Users";
 import User from './User'
 import Posts from "./PostsTable";
 import Post from "./Post";
-import { useQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import { QueryType } from "../../generated/graphql";
 import Settings from "./Settings";
 import Dash from "./Dash";
 import MultipleActionsUsers from "./MultipleActionsUsers";
 import GroupsTable from "./admin/GroupsTable";
-import { GET_PROFILE } from "../../generated/queries";
+import { GET_LIFETIME_TOKEN, GET_PROFILE } from "../../generated/queries";
 import { Reports } from "./Reports";
 import Report from "./Report";
 
@@ -67,6 +67,19 @@ const Panel: React.FC = () => {
 
     const { data, loading } = useQuery<QueryType>(GET_PROFILE)
 
+    const [ loadToken ] = useLazyQuery<QueryType>(GET_LIFETIME_TOKEN, {
+        onCompleted: (data) => Modal.info({
+            title: 'Your lifetime token',
+            content: (
+                <div>
+                    <p>{data.lifetimeToken}</p>
+                </div>
+            ),
+            onOk() { },
+        }),
+        onError: () => message.error("Error")
+    })
+
     if (!loading && data)
         return (
             <Layout style={{ minHeight: '100vh' }}>
@@ -90,7 +103,7 @@ const Panel: React.FC = () => {
                     </Menu>
                 </Sider>
                 <Layout className="site-layout">
-                    <Header className="site-layout-sub-header-background" style={{ padding: 0, alignItems: "end", backgroundColor: "white" }}>
+                    <Header style={{ padding: 0, alignItems: "end" }} className="site-layout-background">
                         <Row justify="center" gutter={[20, 24]} style={{ marginLeft: 20, marginRight: 20 }}>
                             <Col flex="60px" className="row-gutter">
                                 <MenuOutlined onClick={() => setState({ collapsed: !state.collapsed })} />
@@ -101,6 +114,13 @@ const Panel: React.FC = () => {
                                     <h3>QuoteBot Panel</h3>
                                 </Space>
                             </Col>
+                            {(data.profile?.role ?? -1) >= 2 &&
+                                <Col flex="60px" className="row-gutter">
+                                    <Button onClick={() =>
+                                        loadToken()
+                                    }>Lifetime token</Button>
+                                </Col>
+                            }
                             <Col flex="60px" className="row-gutter">
                                 <Button shape="circle" onClick={() => history.push("/panel/settings")}><SettingOutlined /></Button>
                             </Col>
@@ -109,7 +129,7 @@ const Panel: React.FC = () => {
                             </Col>
                         </Row>
                     </Header>
-                    <Layout style={{ padding: '36px' }}>
+                    <Layout style={{ padding: '36px' }} >
                         <Content
                             className="site-layout-background"
                             style={{
