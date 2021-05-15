@@ -7,8 +7,6 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "QuoteBot(Old, Python)", "Qu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuoteSharp(Old, Sharp)", "QuoteSharp\QuoteSharp(Old, Sharp).csproj", "{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VkCallback-Handler", "..\VkCallback-Handler\VkCallback-Handler\VkCallback-Handler.csproj", "{5B05A256-1991-4464-A095-C38B515F03BF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuotePanel", "QuotePanel\QuotePanel.csproj", "{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0B5D4BFA-ACF8-45AB-B037-3EC18FDCD47C} = {0B5D4BFA-ACF8-45AB-B037-3EC18FDCD47C}
@@ -16,7 +14,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuotePanel", "QuotePanel\Qu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseContext", "DatabaseContext\DatabaseContext.csproj", "{0B5D4BFA-ACF8-45AB-B037-3EC18FDCD47C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuoteBot", "QuoteBot\QuoteBot.csproj", "{800756DE-E709-47B7-9A96-A48F69A8FBCC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuoteBot", "QuoteBot\QuoteBot.csproj", "{800756DE-E709-47B7-9A96-A48F69A8FBCC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VkCallback-Handler", "..\VkCallback-Handler\VkCallback-Handler\VkCallback-Handler.csproj", "{585810CC-A3A8-4EB0-B754-430524450C84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,10 +32,6 @@ Global
 		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69BD4FEF-8E4B-4789-9C4A-C1D2F286E41F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B05A256-1991-4464-A095-C38B515F03BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B05A256-1991-4464-A095-C38B515F03BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B05A256-1991-4464-A095-C38B515F03BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B05A256-1991-4464-A095-C38B515F03BF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDE00E1C-77A9-4E59-9505-EAE01BE6173A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -48,6 +44,10 @@ Global
 		{800756DE-E709-47B7-9A96-A48F69A8FBCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{800756DE-E709-47B7-9A96-A48F69A8FBCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{800756DE-E709-47B7-9A96-A48F69A8FBCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{585810CC-A3A8-4EB0-B754-430524450C84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{585810CC-A3A8-4EB0-B754-430524450C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{585810CC-A3A8-4EB0-B754-430524450C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{585810CC-A3A8-4EB0-B754-430524450C84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

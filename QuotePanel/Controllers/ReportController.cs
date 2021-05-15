@@ -31,7 +31,7 @@ namespace QuotePanel.Controllers
 
         [Route("report/{id}")]
         [Authorize(Policy = "GroupModer")]
-        public IActionResult Report([FromRoute]int id)
+        public IActionResult Report([FromRoute] int id)
         {
             var report = context.GetReport(role.Group, id);
 
@@ -57,10 +57,10 @@ namespace QuotePanel.Controllers
                     worksheet.Cells[i + 2, 1].Value = i + 1;
                     worksheet.Cells[i + 2, 2].Value = reportItems[i].User.Name;
                     worksheet.Cells[i + 2, 3].Value = reportItems[i].User.Room;
-                    
+
                     worksheet.Cells[i + 2, 1, i + 2, 3].Style.Fill.SetBackground(color);
 
-                    
+
                 }
                 worksheet.Cells.Style.Font.Size = 16;
 
@@ -69,6 +69,62 @@ namespace QuotePanel.Controllers
                 maxCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 maxCell.Value = $"Max: {report.Max}, in report: {i}";
 
+
+                worksheet.Column(2).AutoFit();
+
+                return File(excel.GetAsByteArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            }
+        }
+
+        [Route("point_report/{id}")]
+        [Authorize(Policy = "GroupModer")]
+        public IActionResult PointReport([FromRoute] int id)
+        {
+            var report = context.GetQuotePoint(role.Group, id);
+
+            if (report == null)
+                return NotFound();
+
+            var reportItems = context.GetQuotePointItems(report).ToList();
+
+            using (var excel = new ExcelPackage())
+            {
+                var worksheet = excel.Workbook.Worksheets.Add(report.Name);
+                worksheet.Select();
+
+                worksheet.Cells[1, 1].Value = "№";
+                worksheet.Cells[1, 2].Value = "Name";
+                worksheet.Cells[1, 3].Value = "Room";
+                worksheet.Cells[1, 4].Value = "Point";
+
+
+                int i = 0;
+                for (i = 0; i < reportItems.Count; i++)
+                {
+                    var color = reportItems[i].Point > 0 ? System.Drawing.Color.LightGreen : System.Drawing.Color.Red;
+                    worksheet.Cells[i + 2, 1].Value = i + 1;
+                    worksheet.Cells[i + 2, 2].Value = reportItems[i].User.Name;
+                    worksheet.Cells[i + 2, 3].Value = reportItems[i].User.Room;
+                    worksheet.Cells[i + 2, 4].Value = reportItems[i].Point;
+
+                    worksheet.Cells[i + 2, 1, i + 2, 4].Style.Fill.SetBackground(color);
+
+
+                }
+                worksheet.Cells.Style.Font.Size = 16;
+
+                var maxCell = worksheet.Cells[i + 4, 1, i + 4, 4];
+                maxCell.Merge = true;
+                maxCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                maxCell.Value = $"In report: {i}";
+
+                if (report.Report.CloseTime.HasValue)
+                {
+                    var dateCell = worksheet.Cells[i + 4, 1, i + 4, 4];
+                    dateCell.Merge = true;
+                    dateCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    dateCell.Value = $"Closing date: {report.Report.CloseTime.Value.AddHours(3).ToShortDateString()} МСК+0";
+                }
 
                 worksheet.Column(2).AutoFit();
 

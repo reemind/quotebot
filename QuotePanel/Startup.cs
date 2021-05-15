@@ -8,16 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 using HotChocolate;
-using QuotePanel.QueryTypes;
 using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Http;
-using HotChocolate.Types;
 using Serilog;
 using Microsoft.AspNetCore.HttpOverrides;
 using OfficeOpenXml;
+using Quartz;
 using System;
 
 namespace QuotePanel
@@ -34,8 +32,7 @@ namespace QuotePanel
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging(loggingBuilder =>
-                loggingBuilder.AddSerilog(dispose: true));
+               
 
             services.AddDbContext<DatabaseContext.DataContext>((builder) =>
                 builder.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
@@ -94,19 +91,7 @@ namespace QuotePanel
                     policy.RequireClaim("Status", "NotLogged"));
             });
 
-            services.AddGraphQL(sp =>
-                SchemaBuilder.New()
-                    .AddQueryType<QueryType>()
-                    .AddMutationType<MutationType>()
-                    .AddType<UserType>()
-                    .AddType<GroupType>()
-                    .AddType<PostType>()
-                    .AddType<QuoteType>()
-                    .AddType<ReportType>()
-                    .AddType<ReportItemType>()
-                    .AddType<UserInfoType>()
-                    .AddServices(sp)
-                    .AddAuthorizeDirectiveType().Create());
+            services.AddGraphQL(sp => QraphQL.GraphQL.GetSchema(sp));
 
             services.AddControllersWithViews();
             services.AddCors();
@@ -114,6 +99,22 @@ namespace QuotePanel
             Methods.Manager.SetData(Configuration.GetSection("AES"));
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            services.AddQuartz(config =>
+            {
+                var jobKey = new JobKey("job");
+                config.AddJob<Background.ScheludedJob>(jobKey);
+
+                config.AddTrigger(config =>
+                {
+                    config.ForJob(jobKey);
+                    config.WithSimpleSchedule(t => t.WithIntervalInSeconds(5).RepeatForever());
+                });
+
+                config.UseMicrosoftDependencyInjectionScopedJobFactory(t => { t.AllowDefaultConstructor = true; });
+            });
+
+            services.AddQuartzServer();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -126,7 +127,6 @@ namespace QuotePanel
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
                           ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddFile("Logs/app-{Date}.txt");
 
             if (env.IsDevelopment())
             {
@@ -162,6 +162,7 @@ namespace QuotePanel
                     pattern: "{controller}/{action=Index}/{id?}");
             });
 
+            // React
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "./ClientApp/build/";

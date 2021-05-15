@@ -20,7 +20,7 @@ export const Reports: React.FC = () => {
             <Table rowKey="id" dataSource={data?.reports?.nodes ?? new Array()}
                 loading={loading}
                 pagination={{ showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} posts` }}>
-                <Table.Column key="id" title="Id" dataIndex="id" sorter={(a: any, b: any) => a.id - b.id} />
+                {/*<Table.Column key="id" title="Id" dataIndex="id" sorter={(a: any, b: any) => a.id - b.id} />*/}
                 <Table.Column key="name" title="Name" dataIndex="name" sorter={(a: any, b: any) => a.text.localeCompare(b.text)}
                     render={(item, record) => (<p><ClosedTag closed={record.closed} /> {record.name}</p>)}/>
                 <Table.Column key="max" title="Max" dataIndex="max" sorter={(a: any, b: any) => a.max - b.max} />

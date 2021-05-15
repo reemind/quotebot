@@ -25,7 +25,7 @@ const successMes = (mess: string = "Success") => {
     message.error('Error');
   };
 
-const TableTransfer = ({ leftColumns, rightColumns, ...restProps }) => (
+export const UsersTableTransfer = ({ leftColumns, rightColumns, ...restProps }) => (
     <Transfer {...restProps} showSelectAll={false}>
         {({
             direction,
@@ -158,7 +158,7 @@ export const MultipleActionsUsers: React.FC<{ all?: boolean }> = ({ all }) => {
                 }}>Add to Post</Button>
             ]}
         >
-            <TableTransfer
+            <UsersTableTransfer
                 onChange={(nextTargetKeys) => setState({ ...state, targetKeys: nextTargetKeys })}
                 loading={loading}
                 targetKeys={state.targetKeys}
@@ -172,7 +172,7 @@ export const MultipleActionsUsers: React.FC<{ all?: boolean }> = ({ all }) => {
                 }
                 showSearch={true}>
 
-            </TableTransfer>
+            </UsersTableTransfer>
         </PageHeader>
 
         <Modal

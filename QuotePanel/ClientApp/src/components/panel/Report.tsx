@@ -9,6 +9,7 @@ import { SwitchVerification } from "./Quote";
 import { ClosedTag, OutTag, RepostTag, VerifiedTag } from "../comps/DataTags";
 import { GET_POST, GET_REPORT, GET_REPORT_CODE } from "../../generated/queries";
 import { CLOSE_REPORT, EDIT_POST_INFO, NOTIFY_USERS, SEND_QR_CODE } from "../../generated/mutations";
+import GetReportButton from "../comps/GetReportButton";
 
 
 const key = "Report"
@@ -124,25 +125,9 @@ export const Report: React.FC<ReportProps> = ({ match }) => {
                             )}><Button onClick={() => setState({ ...state, QrVisible: !state.QrVisible })}><QrcodeOutlined /></Button>
                         </Dropdown>,
                     (data?.report?.closed ?
-                        <Button onClick={() => {
-                            mesloading()
-                            fetch("/provider/report/" + data?.report?.id, {
-                                method: 'GET',
-                                headers: new Headers({
-                                    "Authorization": "Bearer " + localStorage.getItem("token")
-                                })
-                            })
-                                .then(response => response.blob())
-                                .then(blob => {
-                                    var url = window.URL.createObjectURL(blob);
-                                    var a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = "filename.xlsx";
-                                    document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-                                    a.click();
-                                    a.remove();  //afterwards we remove the element again         
-                                });
-                        }}>Make report</Button> :
+                        <GetReportButton
+                            url={"/provider/report/" + data?.report?.id}
+                            filename={"report_" + data?.report?.id}/> :
                         <Popconfirm key="close" title="Do you sure?" placement="bottomRight" onConfirm={() => {
                             closeReport({ variables: { id } })
                         }}>

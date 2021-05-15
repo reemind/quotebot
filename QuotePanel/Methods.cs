@@ -33,6 +33,22 @@ namespace QuotePanel
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
+        public static bool IsMainModer(this GroupRole role, bool? forAdmin)
+        {
+            if (!(forAdmin ?? false))
+                return false;
+
+            return (role.Role == UserRole.Moder || role.Role == UserRole.Admin);
+        }
+
+        public static bool IsMainAdmin(this GroupRole role, bool? forAdmin)
+        {
+            if (!(forAdmin ?? false))
+                return false;
+
+            return (role.Role == UserRole.Admin);
+        }
+
         public static GroupRole GetDataFromClaims(this DataContext context, ClaimsPrincipal user)
         {
             var claims = user.Claims;

@@ -26,20 +26,28 @@ namespace QuoteBot
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging(loggingBuilder =>
-                loggingBuilder.AddSerilog(dispose: true));
+
+            var config = new ConfigurationBuilder().AddJsonFile("Resources/cultures.json").Build().GetSection("cultures");
+
+            services.AddSingleton(
+                config.GetChildren().Select(t => t.GetChildren().First()).ToDictionary(t => t.Key, t => new Language
+                {
+                    Values = t.GetSection("values").GetChildren().ToDictionary(t2 => t2.Key, t2 => t2.Value),
+                    Patterns = t.GetSection("patterns").GetChildren().ToDictionary(t2 => t2.Key, t2 => t2.Value)
+
+                }));
 
             services.AddDbContext<DatabaseContext.DataContext>((builder) =>
                 builder.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
 
             services.AddControllers();
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
                           ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddFile("Logs/app-{Date}.txt");
 
             if (env.IsDevelopment())
             {

@@ -39,3 +39,7 @@ export const VerifiedTag: React.FC<{ verified: boolean }> = ({ verified }) => {
 export const ClosedTag: React.FC<{ closed: boolean }> = ({ closed }) => {
     return (<Tag color={closed ? "red" : "green"}>{closed ? "Closed" : "Open"}</Tag>)
 }
+
+export const TaskTag: React.FC<{ completed: boolean, success: boolean }> = ({ completed, success }) => {
+    return (<Tag color={completed ? (success ? "green" : "red") : "blue"}>{completed ? (success ? "Completed" : "Not completed") : "Waiting"}</Tag>)
+}

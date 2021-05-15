@@ -1,21 +1,27 @@
 import React, { useState } from "react";
 import './Panel.less'
-import { Layout, Menu, Space, Col, Row, Button, Switch as CheckSwitch, Modal, message } from 'antd'
-import { SettingOutlined, LogoutOutlined, DashboardOutlined, BorderlessTableOutlined, LoadingOutlined, SnippetsOutlined, MenuOutlined } from "@ant-design/icons";
+import { Layout, Menu, Space, Col, Row, Button } from 'antd'
+import { SettingOutlined, LogoutOutlined, DashboardOutlined, BorderlessTableOutlined, LoadingOutlined, SnippetsOutlined, MenuOutlined, CheckSquareOutlined, ContainerOutlined, TeamOutlined, UserOutlined, LikeOutlined, QuestionOutlined } from "@ant-design/icons";
 import { Redirect, useHistory, Switch, Route } from "react-router-dom";
 import Users from "./Users";
 import User from './User'
 import Posts from "./PostsTable";
 import Post from "./Post";
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { QueryType } from "../../generated/graphql";
-import Settings from "./Settings";
+import Settings from "./GroupSettings";
 import Dash from "./Dash";
 import MultipleActionsUsers from "./MultipleActionsUsers";
 import GroupsTable from "./admin/GroupsTable";
-import { GET_LIFETIME_TOKEN, GET_PROFILE } from "../../generated/queries";
+import { GET_PROFILE } from "../../generated/queries";
 import { Reports } from "./Reports";
 import Report from "./Report";
+import Tasks from "./Tasks";
+import CreateTask from "./createTask";
+import AccountSettings from "./account/settings";
+import Points from "./Points";
+import { Point } from "./Point";
+import Help from "./Help";
 
 const { Header, Content, Sider } = Layout;
 
@@ -42,6 +48,18 @@ const ContentItems: ItemType[] = [
         key: "reports"
     },
     {
+        path: "/panel/points",
+        key: "points"
+    },
+    {
+        path: "/panel/tasks",
+        key: "tasks"
+    },
+    {
+        path: "/panel/settings",
+        key: "settings"
+    },
+    {
         path: "/panel/admin/users",
         key: "adm_users"
     },
@@ -52,6 +70,10 @@ const ContentItems: ItemType[] = [
     {
         key: "adm_groups",
         path: "/panel/admin/groups"
+    },
+    {
+        key: "help",
+        path: "/panel/help"
     }
 ]
 
@@ -67,39 +89,35 @@ const Panel: React.FC = () => {
 
     const { data, loading } = useQuery<QueryType>(GET_PROFILE)
 
-    const [ loadToken ] = useLazyQuery<QueryType>(GET_LIFETIME_TOKEN, {
-        onCompleted: (data) => Modal.info({
-            title: 'Your lifetime token',
-            content: (
-                <div>
-                    <p>{data.lifetimeToken}</p>
-                </div>
-            ),
-            onOk() { },
-        }),
-        onError: () => message.error("Error")
-    })
+    
 
     if (!loading && data)
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider collapsible breakpoint="lg" collapsed={state.collapsed} onCollapse={(collapsed) => setState({ collapsed })} collapsedWidth="0" trigger={null}>
                     <div className="logo" />
-                    <Menu theme="dark" defaultSelectedKeys={ContentItems.filter(t => history.location.pathname.startsWith(t.path)).map(t => t.key)} mode="vertical" onClick={({ key }) => {
-                        history.push(ContentItems.find(t => t.key === key)?.path ?? "")
-                    }}>
+                    <Menu theme="dark"
+                        selectedKeys={ContentItems.filter(t => history.location.pathname.startsWith(t.path)).map(t => t.key)}
+                        mode="vertical"
+                        onClick={({ key }) => {
+                            history.push(ContentItems.find(t => t.key === key)?.path ?? "")
+                        }}
+                    >
                         <Menu.Item key="dash" icon={<DashboardOutlined />}>Dashboard</Menu.Item>
                         <Menu.Item key="users" icon={<BorderlessTableOutlined />}>Users</Menu.Item>
                         <Menu.Item key="posts" icon={<SnippetsOutlined />}>Posts</Menu.Item>
-                        <Menu.Item key="reports" icon={<SnippetsOutlined />}>Reports</Menu.Item>
+                        <Menu.Item key="reports" icon={<ContainerOutlined />}>Reports</Menu.Item>
+                        <Menu.Item key="points" icon={<LikeOutlined />}>Points</Menu.Item>
+                        <Menu.Item key="tasks" icon={<CheckSquareOutlined />}>Tasks</Menu.Item>
+                        <Menu.Item key="settings" icon={<SettingOutlined />}>Settings</Menu.Item>
                         {(data?.profile?.role ?? 0) > 2 &&
                             <Menu.SubMenu title="For Admins">
                                 <Menu.Item key="adm_dash" icon={<DashboardOutlined />}>Dashboard</Menu.Item>
-                                <Menu.Item key="adm_users" icon={<DashboardOutlined />}>Users</Menu.Item>
-                                <Menu.Item key="adm_groups" icon={<DashboardOutlined />}>Groups</Menu.Item>
-
+                                <Menu.Item key="adm_users" icon={<BorderlessTableOutlined />}>Users</Menu.Item>
+                                <Menu.Item key="adm_groups" icon={<TeamOutlined />}>Groups</Menu.Item>
                             </Menu.SubMenu>
                         }
+                        <Menu.Item key="help" icon={<QuestionOutlined />}>Help</Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout className="site-layout">
@@ -114,15 +132,10 @@ const Panel: React.FC = () => {
                                     <h3>QuoteBot Panel</h3>
                                 </Space>
                             </Col>
-                            {(data.profile?.role ?? -1) >= 2 &&
-                                <Col flex="60px" className="row-gutter">
-                                    <Button onClick={() =>
-                                        loadToken()
-                                    }>Lifetime token</Button>
-                                </Col>
-                            }
                             <Col flex="60px" className="row-gutter">
-                                <Button shape="circle" onClick={() => history.push("/panel/settings")}><SettingOutlined /></Button>
+                                <Button shape="circle" onClick={() => {
+                                    history.push("/panel/account")
+                                }}><UserOutlined /></Button>
                             </Col>
                             <Col flex="60px" className="row-gutter">
                                 <Button shape="circle" onClick={() => history.push("/logout")}><LogoutOutlined /></Button>
@@ -151,8 +164,16 @@ const Panel: React.FC = () => {
                                 <Route path="/panel/reports" component={() => <Reports />} />
                                 <Route path="/panel/report/:id" component={() => <Report />} />
 
+                                <Route exact path="/panel/points" component={() => <Points />} />
+                                <Route path="/panel/point/:id" component={(props) => <Point {...props} />} />
+
+                                <Route exact path="/panel/tasks" component={() => <Tasks />} />
+                                <Route exact path="/panel/task" component={(props) => <CreateTask {...props}/>} />
+                                <Route path="/panel/task/:id" component={(props) => <CreateTask {...props}/>} />
+
                                 <Route path="/panel/settings" component={(props) => <Settings {...props} />} />
 
+                                <Route path="/panel/account" component={(props) => <AccountSettings {...props} />} />
                                 
                                 <Route path="/panel/admin/dash" component={() => <Dash all />} />
 
@@ -167,8 +188,9 @@ const Panel: React.FC = () => {
                                 <Route path="/panel/admin/group/add" component={(props) => <Settings all newGroup {...props} />} />
                                 <Route path="/panel/admin/group/:id" component={(props) => <Settings all {...props} />} />
 
+                                <Route path="/panel/help" component={() => <Help/>} />
 
-                                <Route path="*" component={() => <h3>Not Found</h3>} />
+                                <Route path="/panel/*" component={() => <h3>Not Found</h3>} />
                             </Switch>
                         </Content>
                     </Layout>

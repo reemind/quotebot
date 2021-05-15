@@ -1,6 +1,6 @@
 import { LoadingOutlined, UserOutlined, CheckOutlined } from "@ant-design/icons";
 import { gql, useQuery } from "@apollo/client"
-import { Col, PageHeader, Row, Space, Statistic, Select } from "antd"
+import { Col, PageHeader, Row, Space, Statistic, Select, Card } from "antd"
 import React, { useState } from "react"
 import { QueryType, QueryTypeStatArgs } from "../../generated/graphql";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Area, AreaChart, ResponsiveContainer, } from 'recharts'
@@ -34,8 +34,8 @@ const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
                     <a key="vkLink" target="_blank" rel="noopener noreferrer" href={"https://vk.com/public" + data?.groupInfo?.groupId}>Page</a>
                 ]} />
 
-            <Row align="middle" justify="center" >
-                <Col flex="12" md={12}>
+            <Row align="middle" justify="center">
+                <Col flex="16" md={16}>
                     <ResponsiveContainer height={250}>
                         <BarChart data={data?.stat?.statFloor?.map(t => t as object) ?? undefined}>
                             <CartesianGrid strokeDasharray="3 3" />
@@ -47,7 +47,24 @@ const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
                         </BarChart>
                     </ResponsiveContainer>
                 </Col>
-                <Col flex="12" md={12}>
+                <Col flex="8">
+                    <Row style={{ height: "100%" }} align="middle" justify="center">
+                        <Col>
+                            <Statistic title="All users" value={data?.stat?.statFloor?.reduce((prev, curr) => prev += curr?.count ?? 0, 0)} prefix={<UserOutlined />} />
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+            <Row align="middle" justify="center">
+                
+                <Col flex="8">
+                    <Row style={{ height: "100%" }} align="middle" justify="center">
+                        <Col>
+                            <Statistic title="All quotes" value={data?.stat?.statQuotes?.reduce((prev, curr) => prev += curr?.count ?? 0, 0)} prefix={<CheckOutlined />} />
+                        </Col>
+                    </Row>
+                </Col>
+                <Col flex="16" md={16}>
                     <ResponsiveContainer height={250}>
                         <AreaChart height={250} width={500} data={data?.stat?.statQuotes?.map(t => t as object) ?? undefined}>
                             <XAxis dataKey="date" />
@@ -59,14 +76,6 @@ const Dash: React.FC<{ all?: boolean }> = ({ all }) => {
                         </AreaChart>
                     </ResponsiveContainer>
                 </Col>
-            </Row>
-            <Row style={{ height: 200 }} gutter={60} align="stretch" justify="center">
-                <Col>
-                    <Statistic title="All users" value={data?.stat?.statFloor?.reduce((prev, curr) => prev += curr?.count ?? 0, 0)} prefix={<UserOutlined />} />
-                </Col>
-                <Col >
-
-                </Col><Statistic title="All quotes" value={data?.stat?.statQuotes?.reduce((prev, curr) => prev += curr?.count ?? 0, 0)} prefix={<CheckOutlined />} />
             </Row>
         </React.Fragment>
 

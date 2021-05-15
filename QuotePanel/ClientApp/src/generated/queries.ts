@@ -278,6 +278,80 @@ query GetReportCode($id: Int!) {
 }
 `;
 
+export const GET_QUOTE_POINTS = gql`
+query GetQuotePoints {
+  quotePoints {
+    nodes {
+      id
+      name
+      report{
+        id
+      }
+    }
+  }
+}
+`;
+
+export const GET_QUOTE_POINT_ITEMS = gql`
+query GetQuotePointItems($reportId: Int!) {
+quotePoint(id: $reportId) {
+      id
+      name
+      report{
+        id
+      }
+  }
+  quotePointItems(reportId: $reportId) {
+    nodes {
+      id
+      user {
+        id
+        name
+        room
+      }
+      point
+      comment
+    }
+  }
+}
+
+`;
+
+export const GET_TASKS = gql`
+query GetTasks {
+  tasks {
+    nodes {
+      id
+      comment
+      completed
+      data
+      startTime
+      success
+      taskType
+      creator {
+        id
+        name
+      }
+    }
+  }
+}`;
+
+export const GET_TASK = gql`
+query GetTask($id: Int!) {
+  task(id: $id) {
+      id
+      comment
+      completed
+      data
+      startTime
+      success
+      taskType
+      creator {
+        name
+      }
+  }
+}`;
+
 export const USER_GET_QUERIES = gql`
 query GetUserInfo{
     userInfo{

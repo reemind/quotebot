@@ -12,10 +12,10 @@ export type Scalars = {
   /** The multiplier path scalar represents a valid GraphQL multiplier path string. */
   MultiplierPath: any;
   PaginationAmount: any;
-  /** The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1. */
-  Long: any;
   /** The `DateTime` scalar represents an ISO-8601 compliant date time type. */
   DateTime: any;
+  /** The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1. */
+  Long: any;
 };
 
 
@@ -31,11 +31,16 @@ export type QueryType = {
   qoutes?: Maybe<QuoteTypeConnection>;
   qoutesByPost?: Maybe<QuoteTypeConnection>;
   qoutesByUser?: Maybe<QuoteTypeConnection>;
+  quotePoint?: Maybe<QuotePointType>;
+  quotePointItems?: Maybe<QuotePointItemTypeConnection>;
+  quotePoints?: Maybe<QuotePointTypeConnection>;
   report?: Maybe<ReportType>;
   reportCode?: Maybe<Scalars['String']>;
   reportItems?: Maybe<ReportItemTypeConnection>;
   reports?: Maybe<ReportTypeConnection>;
   stat?: Maybe<StatType>;
+  task?: Maybe<ScheludedTaskType>;
+  tasks?: Maybe<ScheludedTaskTypeConnection>;
   token?: Maybe<Scalars['String']>;
   user?: Maybe<UserType>;
   userInfo?: Maybe<UserInfoType>;
@@ -105,6 +110,28 @@ export type QueryTypeQoutesByUserArgs = {
 };
 
 
+export type QueryTypeQuotePointArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryTypeQuotePointItemsArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  last?: Maybe<Scalars['PaginationAmount']>;
+  reportId: Scalars['Int'];
+};
+
+
+export type QueryTypeQuotePointsArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  last?: Maybe<Scalars['PaginationAmount']>;
+};
+
+
 export type QueryTypeReportArgs = {
   id: Scalars['Int'];
 };
@@ -129,14 +156,25 @@ export type QueryTypeReportsArgs = {
   before?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['PaginationAmount']>;
   last?: Maybe<Scalars['PaginationAmount']>;
-  order_by?: Maybe<ReportTypeSort>;
-  where?: Maybe<ReportTypeFilter>;
 };
 
 
 export type QueryTypeStatArgs = {
   forAdmin?: Maybe<Scalars['Boolean']>;
   groupId?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryTypeTaskArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryTypeTasksArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  last?: Maybe<Scalars['PaginationAmount']>;
 };
 
 
@@ -167,10 +205,13 @@ export type QueryTypeUsersArgs = {
 export type MutationType = {
   __typename?: 'MutationType';
   addUsersToPost: Scalars['Int'];
+  changePoints: Scalars['Boolean'];
   closeReport: Scalars['Boolean'];
   confirmQrCode?: Maybe<UserType>;
   createFromToken: Scalars['Int'];
+  createQuotePoint: Scalars['Boolean'];
   createReport: Scalars['Int'];
+  createTask: Scalars['Boolean'];
   deletePost: Scalars['Boolean'];
   editPostInfo: Scalars['Boolean'];
   editUserInfo: Scalars['Boolean'];
@@ -187,6 +228,12 @@ export type MutationType = {
 export type MutationTypeAddUsersToPostArgs = {
   postId: Scalars['Int'];
   usersIds?: Maybe<Array<Scalars['Int']>>;
+};
+
+
+export type MutationTypeChangePointsArgs = {
+  keyValuePairs?: Maybe<Array<KeyValuePairOfInt32AndDoubleInput>>;
+  quotePointId: Scalars['Int'];
 };
 
 
@@ -208,9 +255,23 @@ export type MutationTypeCreateFromTokenArgs = {
 };
 
 
+export type MutationTypeCreateQuotePointArgs = {
+  point: Scalars['Float'];
+  reportId: Scalars['Int'];
+};
+
+
 export type MutationTypeCreateReportArgs = {
   postId: Scalars['Int'];
   quoteIds?: Maybe<Array<Scalars['Int']>>;
+};
+
+
+export type MutationTypeCreateTaskArgs = {
+  dataJson?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Int']>;
+  startTime?: Maybe<Scalars['String']>;
+  type: Scalars['Int'];
 };
 
 
@@ -339,6 +400,33 @@ export type UserInfoType = {
   reportItems?: Maybe<Array<Maybe<ReportItemType>>>;
 };
 
+export type QuotePointType = {
+  __typename?: 'QuotePointType';
+  id: Scalars['Int'];
+  name?: Maybe<Scalars['String']>;
+  report?: Maybe<ReportType>;
+};
+
+export type QuotePointItemType = {
+  __typename?: 'QuotePointItemType';
+  comment?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  point: Scalars['Float'];
+  user?: Maybe<UserType>;
+};
+
+export type ScheludedTaskType = {
+  __typename?: 'ScheludedTaskType';
+  comment?: Maybe<Scalars['String']>;
+  completed: Scalars['Boolean'];
+  creator?: Maybe<UserType>;
+  data?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  startTime: Scalars['DateTime'];
+  success: Scalars['Boolean'];
+  taskType: Scalars['Int'];
+};
+
 export type GroupInfoType = {
   __typename?: 'GroupInfoType';
   buildNumber?: Maybe<Scalars['String']>;
@@ -355,54 +443,6 @@ export type GroupInfoType = {
   withQrCode?: Maybe<Scalars['Boolean']>;
 };
 
-export type ReportTypeFilter = {
-  AND?: Maybe<Array<ReportTypeFilter>>;
-  closed?: Maybe<Scalars['Boolean']>;
-  closed_not?: Maybe<Scalars['Boolean']>;
-  id?: Maybe<Scalars['Int']>;
-  id_gt?: Maybe<Scalars['Int']>;
-  id_gte?: Maybe<Scalars['Int']>;
-  id_in?: Maybe<Array<Scalars['Int']>>;
-  id_lt?: Maybe<Scalars['Int']>;
-  id_lte?: Maybe<Scalars['Int']>;
-  id_not?: Maybe<Scalars['Int']>;
-  id_not_gt?: Maybe<Scalars['Int']>;
-  id_not_gte?: Maybe<Scalars['Int']>;
-  id_not_in?: Maybe<Array<Scalars['Int']>>;
-  id_not_lt?: Maybe<Scalars['Int']>;
-  id_not_lte?: Maybe<Scalars['Int']>;
-  max?: Maybe<Scalars['Int']>;
-  max_gt?: Maybe<Scalars['Int']>;
-  max_gte?: Maybe<Scalars['Int']>;
-  max_in?: Maybe<Array<Scalars['Int']>>;
-  max_lt?: Maybe<Scalars['Int']>;
-  max_lte?: Maybe<Scalars['Int']>;
-  max_not?: Maybe<Scalars['Int']>;
-  max_not_gt?: Maybe<Scalars['Int']>;
-  max_not_gte?: Maybe<Scalars['Int']>;
-  max_not_in?: Maybe<Array<Scalars['Int']>>;
-  max_not_lt?: Maybe<Scalars['Int']>;
-  max_not_lte?: Maybe<Scalars['Int']>;
-  name?: Maybe<Scalars['String']>;
-  name_contains?: Maybe<Scalars['String']>;
-  name_ends_with?: Maybe<Scalars['String']>;
-  name_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  name_not?: Maybe<Scalars['String']>;
-  name_not_contains?: Maybe<Scalars['String']>;
-  name_not_ends_with?: Maybe<Scalars['String']>;
-  name_not_in?: Maybe<Array<Maybe<Scalars['String']>>>;
-  name_not_starts_with?: Maybe<Scalars['String']>;
-  name_starts_with?: Maybe<Scalars['String']>;
-  OR?: Maybe<Array<ReportTypeFilter>>;
-};
-
-export type ReportTypeSort = {
-  closed?: Maybe<SortOperationKind>;
-  id?: Maybe<SortOperationKind>;
-  max?: Maybe<SortOperationKind>;
-  name?: Maybe<SortOperationKind>;
-};
-
 
 /** A connection to a list of items. */
 export type UserTypeConnection = {
@@ -417,12 +457,12 @@ export type UserTypeConnection = {
 };
 
 /** A connection to a list of items. */
-export type ReportItemTypeConnection = {
-  __typename?: 'ReportItemTypeConnection';
+export type ScheludedTaskTypeConnection = {
+  __typename?: 'ScheludedTaskTypeConnection';
   /** A list of edges. */
-  edges?: Maybe<Array<ReportItemTypeEdge>>;
+  edges?: Maybe<Array<ScheludedTaskTypeEdge>>;
   /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<ReportItemType>>>;
+  nodes?: Maybe<Array<Maybe<ScheludedTaskType>>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
@@ -476,10 +516,41 @@ export type ReportTypeConnection = {
   totalCount: Scalars['Int'];
 };
 
-export enum SortOperationKind {
-  Asc = 'ASC',
-  Desc = 'DESC'
-}
+/** A connection to a list of items. */
+export type ReportItemTypeConnection = {
+  __typename?: 'ReportItemTypeConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<ReportItemTypeEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<ReportItemType>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** A connection to a list of items. */
+export type QuotePointTypeConnection = {
+  __typename?: 'QuotePointTypeConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<QuotePointTypeEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<QuotePointType>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** A connection to a list of items. */
+export type QuotePointItemTypeConnection = {
+  __typename?: 'QuotePointItemTypeConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<QuotePointItemTypeEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<QuotePointItemType>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 /** Information about pagination in a connection. */
 export type PageInfo = {
@@ -504,21 +575,21 @@ export type UserTypeEdge = {
 };
 
 /** An edge in a connection. */
-export type ReportTypeEdge = {
-  __typename?: 'ReportTypeEdge';
+export type QuotePointItemTypeEdge = {
+  __typename?: 'QuotePointItemTypeEdge';
   /** A cursor for use in pagination. */
   cursor: Scalars['String'];
   /** The item at the end of the edge. */
-  node?: Maybe<ReportType>;
+  node?: Maybe<QuotePointItemType>;
 };
 
 /** An edge in a connection. */
-export type ReportItemTypeEdge = {
-  __typename?: 'ReportItemTypeEdge';
+export type ScheludedTaskTypeEdge = {
+  __typename?: 'ScheludedTaskTypeEdge';
   /** A cursor for use in pagination. */
   cursor: Scalars['String'];
   /** The item at the end of the edge. */
-  node?: Maybe<ReportItemType>;
+  node?: Maybe<ScheludedTaskType>;
 };
 
 /** An edge in a connection. */
@@ -548,6 +619,34 @@ export type GroupInfoTypeEdge = {
   node?: Maybe<GroupInfoType>;
 };
 
+/** An edge in a connection. */
+export type ReportTypeEdge = {
+  __typename?: 'ReportTypeEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<ReportType>;
+};
+
+/** An edge in a connection. */
+export type ReportItemTypeEdge = {
+  __typename?: 'ReportItemTypeEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<ReportItemType>;
+};
+
+/** An edge in a connection. */
+export type QuotePointTypeEdge = {
+  __typename?: 'QuotePointTypeEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<QuotePointType>;
+};
+
+
 export type Group = {
   __typename?: 'Group';
   buildNumber?: Maybe<Scalars['String']>;
@@ -564,6 +663,11 @@ export type Group = {
   token?: Maybe<Scalars['String']>;
 };
 
+
+export type KeyValuePairOfInt32AndDoubleInput = {
+  key: Scalars['Int'];
+  value: Scalars['Float'];
+};
 
 export type GroupInfoTypeInput = {
   buildNumber?: Maybe<Scalars['String']>;
@@ -624,6 +728,7 @@ export type Config = {
 export type Report = {
   __typename?: 'Report';
   closed: Scalars['Boolean'];
+  closeTime?: Maybe<Scalars['DateTime']>;
   fromPost?: Maybe<Post>;
   group?: Maybe<Group>;
   id: Scalars['Int'];
@@ -682,7 +787,6 @@ export type Quote = {
   time: Scalars['DateTime'];
   user?: Maybe<User>;
 };
-
 
 export type ReportItem = {
   __typename?: 'ReportItem';

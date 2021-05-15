@@ -9,6 +9,7 @@ using System.Net;
 using VkCallbackApi;
 using System.Resources;
 using DatabaseContext;
+using QuoteBot;
 
 namespace QuotePanel.Controllers
 {
@@ -18,29 +19,31 @@ namespace QuotePanel.Controllers
     {
         DataContext context;
         ILogger<VkController> logger;
+        Dictionary<string, Language> languages;
 
-        public VkController(DataContext _context, ILogger<VkController> _logger)
+        public VkController(DataContext _context, ILogger<VkController> _logger, Dictionary<string, Language> _languages)
         {
             context = _context;
             logger = _logger;
+            languages = _languages;
         }
 
         [HttpPost]
-        public async Task<string> Post([FromBody] CallbackResponse response)
+        public async Task<string> Post([FromBody] CallbackRequest request)
         {
             var group = context.Groups.FirstOrDefault(t =>
-                            t.GroupId == response.GroupId &&
-                            t.Secret == response.Secret);
+                            t.GroupId == request.GroupId &&
+                            t.Secret == request.Secret);
 
             if (group is null)
                 return "Ok";
 
-            if (response.Type == "confirmation")
+            if (request.Type == "confirmation")
                 return group.Key;
 
-            await VkHandler.HandleAsync(
-                new VkCallbackApi(logger, group, context), 
-                response,
+            VkHandler.Handle(
+                new VkCallbackApi(logger, group, context, languages),
+                request,
                 (method) => logger.LogInformation($"Method invoked: {method} in group {group.BuildNumber}"));
             return "Ok";
         }

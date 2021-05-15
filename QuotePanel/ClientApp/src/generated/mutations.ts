@@ -67,3 +67,21 @@ mutation SendQrCode($id: Int!) {
     sendQrCode(id: $id)
 }`;
 
+export const CREATE_TASK = gql`
+mutation CreateTask($startTime: String!, $type: Int!, $dataJson: String!, $id: Int) {
+  createTask(startTime: $startTime, type: $type, dataJson: $dataJson, id: $id)
+}
+`;
+
+export const CREATE_POINTS_REPORT = gql`
+mutation CreatePointReport($reportId: Int!, $point: Float!) {
+    createQuotePoint(reportId: $reportId, point: $point)
+}
+`;
+
+export const CHANGE_POINTS = gql`
+mutation ChangePoints($quotePointId: Int!, $keyValuePairs: [KeyValuePairOfInt32AndDoubleInput!]) {
+  changePoints(quotePointId: $quotePointId, keyValuePairs: $keyValuePairs)
+}
+
+`;
